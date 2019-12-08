@@ -238,12 +238,15 @@ class SFS
 				array('title', 'sfsgentitle', 'label' => $txt['sfs_general_title']),
 
 				array('check', 'sfs_enabled'),
-				array('check', 'sfs_log_debug'),
+				array('int', 'sfs_expire'),
 			'',
 				array('check', 'sfs_emailcheck'),
+			'',
+				array('check', 'sfs_usernamecheck'),
+				array('int', 'sfs_username_confidence'),
+			'',
 				array('check', 'sfs_ipcheck'),
 				array('check', 'sfs_ipcheck_autoban'),
-				array('check', 'sfs_usernamecheck'),
 			'',
 				array('select', 'sfs_region', $this->sfsServerMapping('config')),
 			'',
@@ -274,6 +277,8 @@ class SFS
 				), 'multiple' => true),
 				array('text', 'sfs_verification_options_membersextra', 'subtext' => $txt['sfs_verification_options_extra_subtext']),
 				array('int', 'sfs_verification_options_members_post_threshold'),
+			'',
+				array('check', 'sfs_log_debug'),
 		);
 
 		if ($return_config)
@@ -703,6 +708,8 @@ class SFS
 				// If this was a IP ban, note it.
 				if ($resultType == 'ip' && !empty($extra))
 					$entries[$row['id_sfs']]['result'] .= ' ' . $txt['sfs_log_auto_banned'];			
+				if ($resultType == 'username' && !empty($extra))
+					$entries[$row['id_sfs']]['result'] .= ' ' . sprintf($txt['sfs_log_confidence'], $extra);			
 			}
 			else
 				$entries[$row['id_sfs']]['result'] = $row['result'];
@@ -1090,14 +1097,32 @@ class SFS
 		{
 			foreach ($response['username'] as $check)
 			{
-				// !!! TODO: Expose confidence as a threshold?
 				// Combine with $area we could also require admin approval above thresholds on things like register.
-				// !!! TODO: Expose lastseen as a threshold?
 				if (!empty($check['appears']))
 				{
-					$this->logBlockedStats('username', $check);
-					$requestBlocked = 'username,' . $smcFunc['htmlspecialchars']($check['value']);
-					break;
+					$shouldBlock = true;
+					$confidenceLevel = 0;
+
+					// They meet the confidence level, block them.
+					if (!empty($modSettings['sfs_username_confidence']) && !empty($check['confidence']) && $area == 'register' && (float) $modSettings['sfs_username_confidence'] <= (float) $check['confidence'])
+						$confidenceLevel = $check['confidence'];
+					// We are not confident that they should be blocked.
+					if (!empty($modSettings['sfs_username_confidence']) && !empty($check['confidence']) && $area == 'register' && (float) $modSettings['sfs_username_confidence'] > (float) $check['confidence'])
+					{
+						// Incase we need to debug this.
+						if (!empty($modSettings['sfs_log_debug']))
+							$this->logAllStats('all', $checks, 'username,' . $smcFunc['htmlspecialchars']($check['value']) . ',' . $check['confidence']);
+
+						$shouldBlock = false;
+					}
+
+					// Block them.
+					if ($shouldBlock)
+					{
+						$this->logBlockedStats('username', $check);
+						$requestBlocked = 'username,' . $smcFunc['htmlspecialchars']($check['value']) . ',' . $confidenceLevel;
+						break;
+					}
 				}
 			}
 		}
@@ -1325,6 +1350,10 @@ class SFS
 			$url .= '&badtorexit';
 		// Default handling for Tor is to block all exit nodes, nothing needed here.
 
+		// Do we have to filter out from lastseen?
+		if (!empty($modSettings['sfs_expire']))
+			$url .= '&expire=' . (int) $modSettings['sfs_expire'];
+
 		return $url;
 	}
 
@@ -1426,7 +1455,9 @@ class SFS
 		// Specify the defaults, but only non empties.
 		$defaultSettings = array(
 			'sfs_enabled' => 1,
+			'sfs_expire' => 90,
 			'sfs_emailcheck' => 1,
+			'sfs_username_confidence' => 50.01,
 			'sfs_region' => 0,
 			'sfs_verification_options_members_post_threshold' => 5,
 		);

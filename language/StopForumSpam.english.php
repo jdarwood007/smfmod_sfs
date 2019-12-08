@@ -9,10 +9,12 @@ $txt['sfs_general_title'] = 'General Configuration';
 
 /* Admin section configuration options */
 $txt['sfs_enabled'] = 'Enable Stop Forum Spam?';
+$txt['sfs_expire'] = 'Limit results to entries in the past x days';
 $txt['sfs_log_debug'] = 'Enable Logging of all SFS requests (Debugging Only)?';
 $txt['sfs_ipcheck'] = 'Check IP Address?';
 $txt['sfs_ipcheck_autoban'] = 'Automatically ban IPs that are blacklisted?';
 $txt['sfs_usernamecheck'] = 'Check Username?';
+$txt['sfs_username_confidence'] = 'Confidence level for usernames on registration';
 $txt['sfs_emailcheck'] = 'Check Email? (Recommended)';
 
 /* Admin section: Region Config */
@@ -80,6 +82,7 @@ $txt['sfs_log_types_2'] = 'Email';
 $txt['sfs_log_types_3'] = 'IP Address';
 $txt['sfs_log_matched_on'] = 'Matched on %1$s [%2$s]';
 $txt['sfs_log_auto_banned'] = 'Banned';
+$txt['sfs_log_confidence'] = 'Confidence Level: %1$s';
 
 // The ban group info.
 $txt['sfs_ban_group_name'] = 'SFS Automatic IP Bans';
