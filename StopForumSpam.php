@@ -243,7 +243,7 @@ class SFS
 				array('check', 'sfs_emailcheck'),
 			'',
 				array('check', 'sfs_usernamecheck'),
-				array('int', 'sfs_username_confidence'),
+				array('float', 'sfs_username_confidence'),
 			'',
 				array('check', 'sfs_ipcheck'),
 				array('check', 'sfs_ipcheck_autoban'),
