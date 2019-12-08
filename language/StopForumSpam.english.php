@@ -56,12 +56,14 @@ $txt['sfs_request_blocked'] = 'Your request was denied as one or more emails, us
 
 /* Admin Section Logs */
 $txt['sfs_log_no_entries_found'] = 'No Entries found in the SFS logs';
+$txt['sfs_log_search_url'] = 'URL';
 $txt['sfs_log_search_member'] = 'Member';
 $txt['sfs_log_search_username'] = 'Username';
 $txt['sfs_log_search_email'] = 'Email';
 $txt['sfs_log_search_ip'] = 'IP Address';
 $txt['sfs_log_search_ip2'] = 'IP Address (Ban Check)';
 $txt['sfs_log_header_type'] = 'Log Type';
+$txt['sfs_log_header_url'] = 'URL';
 $txt['sfs_log_header_time'] = 'Time';
 $txt['sfs_log_header_member'] = 'Member';
 $txt['sfs_log_header_username'] = 'Username';

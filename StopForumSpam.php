@@ -273,6 +273,7 @@ class SFS
 		$sort_types = array(
 			'id_type' =>'l.id_type',
 			'log_time' => 'l.log_time',
+			'url' => 'l.url',
 			'member' => 'mem.id_member',
 			'username' => 'l.username',
 			'email' => 'l.email',
@@ -335,6 +336,21 @@ class SFS
 					'sort' => array(
 						'default' => 'l.log_time DESC',
 						'reverse' => 'l.log_time',
+					),
+				),
+				'url' => array(
+					'header' => array(
+						'value' => $txt['sfs_log_header_url'],
+						'class' => 'lefttext',
+					),
+					'data' => array(
+						'db' => 'url',
+						'class' => 'smalltext',
+						'style' => 'word-wrap: break-word;',
+					),
+					'sort' => array(
+						'default' => 'l.url DESC',
+						'reverse' => 'l.url',
 					),
 				),
 				'member' => array(
@@ -482,6 +498,7 @@ class SFS
 				l.id_sfs,
 				l.id_type,
 				l.log_time,
+				l.url,
 				l.id_member,
 				l.username,
 				l.email,
@@ -510,6 +527,7 @@ class SFS
 				'id' => $row['id_sfs'],
 				'type' => $txt['sfs_log_types_' . $row['id_type']],
 				'time' => timeformat($row['log_time']),
+				'url' => preg_replace('~http(s)?://~i', 'hxxp\\1://', $row['url']),
 				'timestamp' => forum_time(true, $row['log_time']),
 				'member_link' => $row['id_member'] ? '<a href="' . $scripturl . '?action=profile;u=' . $row['id_member'] . '">' . $row['real_name'] . '</a>' : (empty($row['real_name']) ? ($txt['guest'] . (!empty($row['extra']['member_acted']) ? ' (' . $row['extra']['member_acted'] . ')' : '')) : $row['real_name']),
 				'username' => $row['username'],
@@ -909,10 +927,22 @@ die;
 
 		$smcFunc['db_insert']('',
 			'{db_prefix}log_sfs',
-			array('id_type' => 'int', 'log_time' => 'int', 'id_member' => 'int', 'username' => 'string', 'email' => 'string', 'ip' => 'string', 'ip2' => 'string', 'checks' => 'string', 'result' => 'string'),
+			array(
+				'id_type' => 'int',
+				'log_time' => 'int',
+				'url' => 'string',
+				'id_member' => 'int',
+				'username' => 'string',
+				'email' => 'string',
+				'ip' => 'string',
+				'ip2' => 'string',
+				'checks' => 'string',
+				'result' => 'string'
+			),
 			array(
 				$blockType, // Blocked request
 				time(),
+				$smcFunc['htmlspecialchars']($_SERVER['REQUEST_URL']),
 				$user_info['id'],
 				$type == 'username' ? $check['value'] : '',
 				$type == 'email' ? $check['value'] : '',
@@ -934,10 +964,22 @@ die;
 
 		$smcFunc['db_insert']('',
 			'{db_prefix}log_sfs',
-			array('id_type' => 'int', 'log_time' => 'int', 'id_member' => 'int', 'username' => 'string', 'email' => 'string', 'ip' => 'string', 'ip2' => 'string', 'checks' => 'string', 'result' => 'string'),
+			array(
+				'id_type' => 'int',
+				'log_time' => 'int',
+				'url' => 'string',
+				'id_member' => 'int',
+				'username' => 'string',
+				'email' => 'string',
+				'ip' => 'string',
+				'ip2' => 'string',
+				'checks' => 'string',
+				'result' => 'string'
+			),
 			array(
 				0, // Debug type.
 				time(),
+				$smcFunc['htmlspecialchars']($_SERVER['REQUEST_URL']),
 				$user_info['id'],
 				'', // Username
 				'', // email
@@ -1183,6 +1225,7 @@ die;
 		}
 
 		$searchTypes = array(
+			'url' => array('sql' => 'l.url', 'label' => $txt['sfs_log_search_url']),
 			'member' => array('sql' => 'mem.real_name', 'label' => $txt['sfs_log_search_member']),
 			'username' => array('sql' => 'l.username', 'label' => $txt['sfs_log_search_username']),
 			'email' => array('sql' => 'l.email', 'label' => $txt['sfs_log_search_email']),
