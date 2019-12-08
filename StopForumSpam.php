@@ -292,7 +292,7 @@ class SFS
 			checkSession();
 
 			// If we are automatically banning IPs, make sure we have a ban group.
-			if (isset($_POST['sfs_ipcheck_autoban']) || empty($modSettings['sfs_ipcheck_autoban_group']))
+			if (isset($_POST['sfs_ipcheck_autoban']) && empty($modSettings['sfs_ipcheck_autoban_group']))
 				$this->createBanGroup(true);
 
 			saveDBSettings($config_vars);
@@ -1621,10 +1621,10 @@ class SFS
 		$request = $smcFunc['db_query']('', '
 			SELECT id_ban_group
 			FROM {db_prefix}ban_groups
-			WHERE name = {string:new_ban_name}' . '
+			WHERE name = {string:new_ban_name}
 			LIMIT 1',
 			array(
-				'new_ban_name' => $txt['sfs_ban_group_name'],
+				'new_ban_name' => substr($txt['sfs_ban_group_name'], 0, 20),
 			)
 		);
 		if ($smcFunc['db_num_rows']($request) == 1)
@@ -1644,7 +1644,7 @@ class SFS
 
 		// Ban Information, this follows the format from the function.
 		$ban_info = array(
-			'name' => $txt['sfs_ban_group_name'],
+			'name' => substr($txt['sfs_ban_group_name'], 0, 20),
 			'cannot' => array(
 				'access' => 1,
 				'register' => 1,
