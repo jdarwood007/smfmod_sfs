@@ -1,4 +1,11 @@
 <?php
+/**
+ * The Main class for Stop Forum Spam
+ * @package StopForumSpam
+ * @author SleePy <sleepy @ simplemachines (dot) org>
+ * @copyright 2019
+ * @license 3-Clause BSD https://opensource.org/licenses/BSD-3-Clause
+ */
 
 // If we have found SSI.php and we are outside of SMF, then we are running standalone.
 if (file_exists(dirname(__FILE__) . '/SSI.php') && !defined('SMF'))

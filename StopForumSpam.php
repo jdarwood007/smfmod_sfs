@@ -1,45 +1,78 @@
 <?php
 
+/**
+ * The Main class for Stop Forum Spam
+ * @package StopForumSpam
+ * @author SleePy <sleepy @ simplemachines (dot) org>
+ * @copyright 2019
+ * @license 3-Clause BSD https://opensource.org/licenses/BSD-3-Clause
+ * @version 1.0.1
+ */
 class SFS
 {
-	/* Some URLs */
+	/**
+	 * @var string URLS we need to SFS for UI presentation.
+	 */
 	private $urlSFSipCheck = 'https://www.stopforumspam.com/ipcheck/%1$s';
 	private $urlSFSsearch = 'https://www.stopforumspam.com/search/%1$s';
 
-	/* Our Software/Version Info defaults */
+
+	/**
+	 * @var string Name of the software and its version.  This is so we can branch out from the same base.
+	 */
 	private $softwareName = 'smf';
 	private $softwareVersion = '2.1';
 
-	/* The admin page url */
+	/**
+	 * @var string The URL for the admin page.
+	 */
 	private $adminPageURL = null;
 
-	/* Settings we defaulted*/
+	/**
+	 * @var array Our settings information used on saving/changing settings.
+	 */
 	private $changedSettings = array();
 	private $extraVerificationOptions = array();
 
-	/* Search stuff */
+	/**
+	 * @var mixed Search area handling.
+	 */
 	private $search_params = array();
 	private $search_params_column = '';
 
-	/* Logs Disabled for */
+	/**
+	 * @var int How long we disable removing logs.
+	 */
 	private $hoursDisabled = 24;
 
-	/* Startup the class so we can call it later
-		@hook: SMF2.0: integrate_admin_areas
-		@hook: SMF2.1: integrate_admin_areas
-		@CalledIn: SMF 2.0, SMF 2.1
-	*/
-	public static function hook_pre_load()
+	/**
+	 * Simple setup for the class to be used later correctly.
+	 * This simply loads the class into $smcFunc and we can grab this anywhere else later.
+	 *
+	 * @api
+	 * @CalledIn SMF 2.0, SMF 2.1
+	 * @version 1.0
+	 * @since 1.0
+	 * @uses integrate_pre_load - Hook SMF2.0
+	 * @uses integrate_pre_load - Hook SMF2.1 
+	 * @return void No return is generated
+	 */
+	public static function hook_pre_load(): void
 	{
 		global $smcFunc;
 		
 		$smcFunc['classSFS'] = new SFS();
 	}
 
-	/*
-		We do this once we construct
-		@CalledIn: SMF 2.0, SMF 2.1
-	*/
+	/**
+	 * Build the class, figure out what software/version we have.
+	 * Loads up the defaults.
+	 *
+	 * @CalledIn SMF 2.0, SMF 2.1
+	 * @version 1.0
+	 * @since 1.0
+	 * @return void No return is generated
+	 */
 	public function __construct()
 	{
 		global $smcFunc;
@@ -52,23 +85,41 @@ class SFS
 		$this->loadDefaults();
 	}
 
-	/*
-		Admin Panel areas addition
-		@CalledIn: SMF 2.0, SMF 2.1
-		@hook: SMF2.0: integrate__admin_areas
-		@hook: SMF2.1: integrate__admin_areas
-	*/
-	public static function hook_admin_areas(&$admin_areas)
+	/**
+	 * Creates the hook to the class for the admin areas.
+	 *
+	 * @param array $admin_areas A associate array from the software with all valid admin areas.
+	 *
+	 * @api
+	 * @CalledIn SMF 2.0, SMF 2.1
+	 * @see SFS::setupAdminAreas()
+	 * @version 1.0
+	 * @since 1.0
+	 * @uses integrate__admin_areas - Hook SMF2.0
+	 * @uses integrate__admin_areas - Hook SMF2.1 
+	 * @return void No return is generated
+	 */
+	public static function hook_admin_areas(array &$admin_areas)
 	{
 		global $smcFunc;
 		return $smcFunc['classSFS']->setupAdminAreas($admin_areas);
 	}
 
-	/*
-		Does the actual setup of the admin areas
-		@CalledIn: SMF 2.0, SMF 2.1
-	*/
-	public function setupAdminAreas(&$admin_areas)
+	/**
+	 * Startup the Admin Panels Additions.
+	 * Where things appear are based on what software/version you have.
+	 *
+	 * @param array $admin_areas A associate array from the software with all valid admin areas.
+	 *
+	 * @internal
+	 * @CalledIn SMF 2.0, SMF 2.1
+	 * @version 1.0
+	 * @since 1.0
+	 * @uses integrate__admin_areas - Hook SMF2.0
+	 * @uses integrate__admin_areas - Hook SMF2.1 
+	 * @return void No return is generated
+	 */
+	private function setupAdminAreas(array &$admin_areas): void
 	{
 		global $txt, $scripturl;
 
@@ -100,53 +151,86 @@ class SFS
 				$txt['sfs_admin_logs']
 			);
 		}
-
-		return;
 	}
 
-	/*
-		Only do this for 2.0, but we put it in the mod section.
-		@hook: SMF2.0: integrate_modify_modifications
-		@hook: SMF2.1: 
-		@CalledIn: SMF 2.0
-	*/
-	public static function hook_modify_modifications(&$subActions)
+	/**
+	 * Setup the Modification's setup page.
+	 * For some versions, we put the logs into the modifications sections, its easier.
+	 *
+	 * @param array $subActions A associate array from the software with all valid modification sections.
+	 *
+	 * @api
+	 * @CalledIn SMF 2.0, SMF 2.1
+	 * @see SFS::setupModifyModifications()
+	 * @version 1.0
+	 * @since 1.0
+	 * @uses integrate_modify_modifications - Hook SMF2.0
+	 * @uses integrate_modify_modifications - Hook SMF2.1
+	 * @return void No return is generated
+	 */
+	public static function hook_modify_modifications(array &$subActions)
 	{
 		global $smcFunc;
 		return $smcFunc['classSFS']->setupModifyModifications($subActions);
 	}
 
-	/*
-		Setup the Configuration page.
-		@CalledIn: SMF 2.0
-	*/
-	public function setupModifyModifications(&$subActions)
+	/**
+	 * Setup the Modifications section links.
+	 * For some versions we add the logs here as well.
+	 *
+	 * @param array $subActions A associate array from the software with all valid modification sections.
+	 *
+	 * @internal
+	 * @CalledIn SMF 2.0, SMF 2.1
+	 * @version 1.0
+	 * @since 1.0
+	 * @uses integrate_modify_modifications - Hook SMF2.0
+	 * @uses integrate_modify_modifications - Hook SMF2.1
+	 * @return void No return is generated
+	 */
+	private function setupModifyModifications(array &$subActions): void
 	{
 		$subActions['sfs'] = 'SFS::startupAdminConfiguration';
 
 		// Only in SMF 2.0 do we drop logs here.
 		if ($this->versionCheck('2.0', 'smf'))
 			$subActions['sfslog'] = 'SFS::startupLogs';
-
-		return;
 	}
 
-	/*
-		Only need to do this for SMF 2.0, SMF 2.1 calls hook_manage_logs
-		@hook: SMF2.0: integrate_modify_modifications
-		@CalledIn: SMF 2.0
-	*/
-	public static function startupAdminConfiguration($return_config = false)
+	/**
+	 * The configuration caller.
+	 *
+	 * @param bool $return_config If true, returns the configuration options for searches.
+	 *
+	 * @api
+	 * @CalledIn SMF 2.0, SMF 2.1
+	 * @see SFS::setupSFSConfiguration
+	 * @version 1.0
+	 * @since 1.0
+	 * @uses integrate_modify_modifications - Hook SMF2.0
+	 * @uses integrate_modify_modifications - Hook SMF2.1
+	 * @return void No return is generated
+	 */
+	public static function startupAdminConfiguration(bool $return_config = false)
 	{
 		global $smcFunc;
 		return $smcFunc['classSFS']->setupSFSConfiguration($return_config);
 	}
 
-	/*
-		The settings page.
-		@CalledIn: SMF 2.0, SMF 2.1
-	*/
-	public function setupSFSConfiguration($return_config = false)
+	/**
+	 * The actual settings page.
+	 *
+	 * @param bool $return_config If true, returns the configuration options for searches.
+	 *
+	 * @internal
+	 * @CalledIn SMF 2.0, SMF 2.1
+	 * @version 1.0
+	 * @since 1.0
+	 * @uses integrate_modify_modifications - Hook SMF2.0
+	 * @uses integrate_modify_modifications - Hook SMF2.1
+	 * @return void No return is generated
+	 */
+	private function setupSFSConfiguration(bool $return_config = false): array
 	{
 		global $txt, $scripturl, $context, $settings, $sc, $modSettings;
 
@@ -211,46 +295,75 @@ class SFS
 
 		prepareDBSettingContext($config_vars);
 
-		return;
+		return array();
 	}
 
-	/*
-		In SMF 2.1 we do this hook.
-		@hook: SMF2.0:
-		@hook: SMF2.1: integrate_manage_logs
-		@CalledIn: SMF 2.1
-	*/
-	public static function hook_manage_logs(&$log_functions)
+	/**
+	 * In some software/versions, we can hook into the logs section.
+	 * In others we hook into the modifications settings.
+	 *
+	 * @param bool $return_config If true, returns empty array to prevent breaking old SMF installs.
+	 *
+	 * @api
+	 * @CalledIn SMF 2.1
+	 * @See SFS::startupLogs
+	 * @version 1.0
+	 * @since 1.0
+	 * @uses integrate_manage_logs - Hook SMF2.1
+	 * @return void No return is generated
+	 */
+	public static function hook_manage_logs(array &$log_functions):void 
 	{
 		global $smcFunc;
 
+		// Add our logs sub action.
 		$log_functions['sfslog'] = array('StopForumSpam.php', 'startupLogs');
 
+		// Add it to the menu as well.
 		$context[$context['admin_menu_name']]['tab_data']['tabs']['sfslog'] = array(
 			'description' => $txt['sfs_admin_logs'],
 		);
-
-		return;
 	}
 
-	/*
-		Show the logs as called by SMF from either hook_manage_logs (SMF 2.1) or setupModifyModifications (SMF 2.0)
-	*/
-	public static function startupLogs($return_config = false)
+	/**
+	 * Log startup caller.
+	 * This has a $return_config just for simply complying with properly for searching the admin panel.
+	 *
+	 * @param bool $return_config If true, returns empty array to prevent breaking old SMF installs.
+	 *
+	 * @api
+	 * @CalledIn SMF 2.1
+	 * @See SFS::loadLogs
+	 * @version 1.0
+	 * @since 1.0
+	 * @uses hook_manage_logs - Hook SMF2.1
+	 * @uses setupModifyModifications - Injected SMF2.0
+	 * @return void No return is generated
+	 */
+	public static function startupLogs(bool $return_config = false): array
 	{
 		global $smcFunc;
-
-		// No Configs.
-		if ($return_config)
-			return array();
 
 		return $smcFunc['classSFS']->loadLogs();
 	}
 
-	/*
-		Actually load up logs
-	*/
-	public function loadLogs($return_config = false)
+	/**
+	 * Actually show the logs.
+	 * This has a $return_config just for simply complying with properly for searching the admin panel.
+	 *
+	 * @param bool $return_config If true, returns empty array to prevent breaking old SMF installs.
+	 *
+	 * @api
+	 * @CalledIn SMF2.0, SMF 2.1
+	 * @See SFS::getSFSLogEntries
+	 * @See SFS::getSFSLogEntriesCount
+	 * @version 1.0
+	 * @since 1.0
+	 * @uses hook_manage_logs - Hook SMF2.1
+	 * @uses setupModifyModifications - Injected SMF2.0
+	 * @return void No return is generated
+	 */
+	public function loadLogs(bool $return_config = false): array
 	{
 		global $context, $txt, $smcFunc, $sourcedir;
 
@@ -346,7 +459,7 @@ class SFS
 					'data' => array(
 						'db' => 'url',
 						'class' => 'smalltext',
-						'style' => 'word-wrap: break-word;',
+						'style' => 'word-break: break-all;',
 					),
 					'sort' => array(
 						'default' => 'l.url DESC',
@@ -484,15 +597,33 @@ class SFS
 
 		$context['sub_template'] = 'show_list';
 		$context['default_list'] = 'sfslog_list';
+
+		return array();
 	}
 
-	/*
-		Get the Log entries
-	*/
-	public function getSFSLogEntries($start, $items_per_page, $sort, $query_string = '', $query_params = array())
+	/**
+	 * Get the log data and returns it ready to go for GenericList handling.
+	 *
+	 * @param int $start The index for where we offset or start at for the list
+	 * @param int $items_per_page How many items we are going to show on this page.
+	 * @param string $sort The column we are sorting by.
+	 * @param string $query_string The search string we are using to filter log data.
+	 * @param array $query_params Extra parameters for searching.
+	 *
+	 * @api
+	 * @CalledIn SMF 2.0, SMF 2.1
+	 * @See SFS::loadLogs
+	 * @version 1.0
+	 * @since 1.0
+	 * @uses hook_manage_logs - Hook SMF2.1
+	 * @uses setupModifyModifications - Injected SMF2.0
+	 * @return void No return is generated
+	 */
+	public function getSFSLogEntries(int $start, int $items_per_page, string $sort, string $query_string = '', array $query_params = array()): array
 	{
 		global $context, $smcFunc, $txt;
 
+		// Fetch all of our logs.
 		$result = $smcFunc['db_query']('', '
 			SELECT
 				l.id_sfs,
@@ -541,13 +672,14 @@ class SFS
 
 			$checksDecoded = $this->decodeJSON($row['checks']);
 
-			// Checks, username
+			// If we know what check triggered this, link it up to be searched.
 			if ($row['id_type'] == 1)
 				$entries[$row['id_sfs']]['checks'] = '<a href="' . sprintf($this->urlSFSsearch, $checksDecoded['value']) . '">' . $checksDecoded['value'] . '</a>';
 			elseif ($row['id_type'] == 2)
 				$entries[$row['id_sfs']]['checks'] = '<a href="' . sprintf($this->urlSFSsearch, $checksDecoded['value']) . '">' . $checksDecoded['value'] . '</a>';
 			elseif ($row['id_type'] == 3)
 				$entries[$row['id_sfs']]['checks'] = '<a href="' . sprintf($this->urlSFSsearch, $checksDecoded['value']) . '">' . $checksDecoded['value'] . '</a>';
+			// No idea what triggered it, parse it out cleanly.  Could be debug data as well.
 			else
 			{
 				$entries[$row['id_sfs']]['checks'] = '';
@@ -557,7 +689,7 @@ class SFS
 						$entries[$row['id_sfs']]['checks'] .= ucfirst($key) . ':' . $value . '<br>';					
 			}
 
-			// $results
+			// This tells us what it matched on exactly.
 			if (strpos($row['result'], ',') !== false)
 			{
 				list($resultType, $resultMatch) = explode(',', $row['result']);
@@ -572,10 +704,22 @@ class SFS
 		return $entries;
 	}
 
-	/*
-		Get the Counter Log entries
-	*/
-	public function getSFSLogEntriesCount($query_string = '', $query_params = array(), $log_type = 1)
+	/**
+	 * Get the log counts and returns it ready to go for GenericList handling.
+	 *
+	 * @param string $query_string The search string we are using to filter log data.
+	 * @param array $query_params Extra parameters for searching.
+	 *
+	 * @api
+	 * @CalledIn SMF 2.0, SMF 2.1
+	 * @See SFS::loadLogs
+	 * @version 1.0
+	 * @since 1.0
+	 * @uses hook_manage_logs - Hook SMF2.1
+	 * @uses setupModifyModifications - Injected SMF2.0
+	 * @return void No return is generated
+	 */
+	public function getSFSLogEntriesCount(string $query_string = '', array $query_params = array()): int
 	{
 		global $smcFunc, $user_info;
 
@@ -594,13 +738,20 @@ class SFS
 		list ($entry_count) = $smcFunc['db_fetch_row']($result);
 		$smcFunc['db_free_result']($result);
 
-		return $entry_count;
+		return (int) $entry_count;
 	}
 
-	/*
-		Remove all logs, except for those 24 horus or newer.
-	*/
-	private function removeAllLogs()
+	/**
+	 * Remove all logs, except those less than 24 hours old.
+	 *
+	 * @api
+	 * @CalledIn SMF 2.0, SMF 2.1
+	 * @See SFS::loadLogs
+	 * @version 1.0
+	 * @since 1.0
+	 * @return void No return is generated
+	 */
+	private function removeAllLogs(): void
 	{
 		global $smcFunc;
 
@@ -615,10 +766,19 @@ class SFS
 		);
 	}
 
-	/*
-		Remove specific logs, except for those 24 horus or newer.
-	*/
-	private function removeLogs($entries)
+	/**
+	 * Remove specific logs, except those less than 24 hours old.
+	 *
+	 * @param array $entries A array of the ids that we want to remove.
+	 *
+	 * @api
+	 * @CalledIn SMF 2.0, SMF 2.1
+	 * @See SFS::loadLogs
+	 * @version 1.0
+	 * @since 1.0
+	 * @return void No return is generated
+	 */
+	private function removeLogs(array $entries): void
 	{
 		global $smcFunc;
 
@@ -635,32 +795,55 @@ class SFS
 		);
 	}
 
-	/*
-		Handle registration events
-		@CalledIn: SMF 2.0, SMF 2.1
-		@calledAt: action=signup, action=admin;area=regcenter;sa=register
-		@hook: SMF2.0: integrate_register
-		@hook: SMF2.1: integrate_register
-	*/
-	public static function hook_register(&$regOptions, &$theme_vars)
+	/**
+	 * Handle registration events.
+	 *
+	 * @param array $regOptions An array from the software with all the registration optins we are going to use to register.
+	 * @param array $theme_vars An array from the software with all the possible theme settings we are going to use to register.
+	 *
+	 * @api
+	 * @CalledIn SMF 2.0, SMF 2.1
+	 * @CalledAt: action=signup, action=admin;area=regcenter;sa=register
+	 * @See SFS::checkRegisterRequest
+	 * @version 1.0
+	 * @since 1.0
+	 * @uses integrate_register - Hook SMF2.1
+	 * @uses integrate_register - Hook SMF2.0
+	 * @return bool True is success, no other bool is expeicifcly defined yet.
+	 */
+	public static function hook_register(array &$regOptions, array &$theme_vars): bool
 	{
 		global $smcFunc;
 		return $smcFunc['classSFS']->checkRegisterRequest($regOptions, $theme_vars);
 	}
 
-	/*
-		Something is attempting to register, we should check them out.
-	*/
-	public function checkRegisterRequest(&$regOptions, &$theme_vars)
+	/**
+	 * Something is attempting to register, we should check them out.
+	 *
+	 * @param array $regOptions An array from the software with all the registration optins we are going to use to register.
+	 * @param array $theme_vars An array from the software with all the possible theme settings we are going to use to register.
+	 *
+	 * @api
+	 * @CalledIn SMF 2.0, SMF 2.1
+	 * @CalledAt: action=signup, action=admin;area=regcenter;sa=register
+	 * @See SFS::checkRegisterRequest
+	 * @version 1.0
+	 * @since 1.0
+	 * @uses integrate_register - Hook SMF2.1
+	 * @uses integrate_register - Hook SMF2.0
+	 * @return bool True is success, no other bool is expeicifcly defined yet.
+	 */
+	private function checkRegisterRequest(array &$regOptions, array &$theme_vars): bool
 	{
 		// Admins are not spammers.. usually.
 		if ($regOptions['interface'] == 'admin')
 			return true;
+
 		// Get our language in here.
 		$this->loadLanguage();
 
 		// Pass everything and let us handle what options we pass on.  We pass the register_vars as these are what we have cleaned up.
-		$this->sfsCheck(array(
+		return $this->sfsCheck(array(
 			array('username' => $regOptions['register_vars']['member_name']),
 			array('email' => $regOptions['register_vars']['email_address']),
 			array('ip' => $regOptions['register_vars']['member_ip']),
@@ -668,22 +851,42 @@ class SFS
 		), 'register');
 	}
 
-	/*
-		Handle verification events, except register.
-		@CalledIn: SMF 2.1
-		@hook: SMF2.1: integrate_create_control_verification_test
-	*/
-	public static function hook_create_control_verification_test($thisVerification, &$verification_errors)
+	/**
+	 * The caller for a verification test.
+	 *
+	 * @param array $thisVerification An array from the software with all the verification information we have.
+	 * @param array $verification_errors An errors which exist from verification.
+	 *
+	 * @api
+	 * @CalledIn SMF 2.0, SMF 2.1
+	 * @See SFS::checkVerificationTest
+	 * @version 1.0
+	 * @since 1.0
+	 * @uses integrate_create_control_verification_test - Hook SMF2.1
+	 * @return bool True is success, no other bool is expeicifcly defined yet.
+	 */
+	public static function hook_create_control_verification_test(array $thisVerification, array &$verification_errors): bool
 	{
 		global $smcFunc;
-		$smcFunc['classSFS']->checkVerificationTest($thisVerification, $verification_errors);
+		return $smcFunc['classSFS']->checkVerificationTest($thisVerification, $verification_errors);
 	}
-	
-	/*
-		Something is attempting to post, we should check them out.
-		SMF 2.0 calls this directly as it doesnn't have a hook.
-	*/
-	public function checkVerificationTest($thisVerification, &$verification_errors)
+
+	/**
+	 * The caller for a verification test.
+	 * SMF 2.0 calls this directly as we have no good hook.
+	 *
+	 * @param array $thisVerification An array from the software with all the verification information we have.
+	 * @param array $verification_errors An errors which exist from verification.
+	 *
+	 * @api
+	 * @CalledIn SMF 2.0, SMF 2.1
+	 * @version 1.0
+	 * @since 1.0
+	 * @uses create_control_verification - Hook SMF2.0
+	 * @uses integrate_create_control_verification_test - Hook SMF2.1
+	 * @return bool True is success, no other bool is expeicifcly defined yet.
+	 */
+	public function checkVerificationTest(array $thisVerification, array &$verification_errors): bool
 	{
 		global $user_info;
 
@@ -694,6 +897,7 @@ class SFS
 		// Get our language in here.
 		$this->loadLanguage();
 
+		// Get our options data.
 		$options = $this->getVerificationOptions();
 
 		// Posting?
@@ -777,13 +981,23 @@ class SFS
 
 			return $this->sfsCheck($checks, $option);
 		}
-die;
+
+		return true;
 	}
 
-	/*
-		Check data against the SFS database
-	*/
-	public function sfsCheck($checks, $area = null)
+	/**
+	 * Run checks against the SFS database.
+	 *
+	 * @param array $checks All the possible checks we would like to preform.
+	 * @param string $area The area this is coming from.
+	 *
+	 * @internal
+	 * @CalledIn SMF 2.0, SMF 2.1
+	 * @version 1.0
+	 * @since 1.0
+	 * @return bool True is success, no other bool is expeicifcly defined yet.
+	 */
+	private function sfsCheck(array $checks, string $area = null): bool
 	{
 		global $sourcedir, $smcFunc, $context, $modSettings, $txt;
 
@@ -902,13 +1116,23 @@ die;
 		fatal_error($txt['sfs_request_blocked']);
 	}
 
-	/*
-		Log the blocked request for later
-	*/
-	private function logBlockedStats($type, $check)
+	/**
+	 * Log that this was blocked.
+	 *
+	 * @param string $type Either username, email, or ip.  Anything else gets marked uknown.
+	 * @param array $check The check data we are logging.
+	 *
+	 * @internal
+	 * @CalledIn SMF 2.0, SMF 2.1
+	 * @version 1.0
+	 * @since 1.0
+	 * @return bool True is success, no other bool is expeicifcly defined yet.
+	 */
+	private function logBlockedStats(string $type, array $check): void
 	{
 		global $smcFunc, $user_info;
 
+		// What type of log is this?
 		switch($type)
 		{
 			case 'username':
@@ -955,10 +1179,20 @@ die;
 		);
 	}
 
-	/*
-		Log all the data for later.
-	*/
-	private function logAllStats($type, $checks, $requestBlocked)
+	/**
+	 * Debug logging that this was blocked..
+	 *
+	 * @param string $type Either error or all, currently ignored.
+	 * @param array $check The check data we are logging.
+	 * @param string $DebugMessage Debugging message, sometimes just is error or failure, otherwise a comma separated of what request was blocked.
+	 *
+	 * @internal
+	 * @CalledIn SMF 2.0, SMF 2.1
+	 * @version 1.0
+	 * @since 1.0
+	 * @return bool True is success, no other bool is expeicifcly defined yet.
+	 */
+	private function logAllStats(string $type, array $checks, string $DebugMessage): void
 	{
 		global $smcFunc, $user_info;
 
@@ -992,12 +1226,20 @@ die;
 		);
 	}
 
-	/*
-		Decode JSON data.
-		If we have $smcFunc['json_decode'] we use it as it can handle errors.
-		Otherwise we do some basic stuff.
-	*/
-	private function decodeJSON($requestData)
+	/**
+	 * Decode JSON data and return it.
+	 * If we have $smcFunc['json_decode'], we use this as it handles errors natively.
+	 * For all others, we simply ensure a proper array is returned in the event of a error. 
+	 *
+	 * @param string $requestData A properly formatted json string.
+	 *
+	 * @internal
+	 * @CalledIn SMF 2.0, SMF 2.1
+	 * @version 1.0
+	 * @since 1.0
+	 * @return array The parsed json string is now an array.
+	 */
+	private function decodeJSON(string $requestData): array
 	{
 		global $smcFunc;
 
@@ -1017,11 +1259,17 @@ die;
 		}
 	}
 
-	/*
-		Build the base URL for the Stop Forum Spam website
-		@resource: https://www.stopforumspam.com/usage
-	*/
-	public function buildServerURL()
+	/**
+	 * Build the SFS Server URL based on our configuration setup. 
+	 *
+	 * @internal
+	 * @link: https://www.stopforumspam.com/usage
+	 * @CalledIn SMF 2.0, SMF 2.1
+	 * @version 1.0
+	 * @since 1.0
+	 * @return array The parsed json string is now an array.
+	 */
+	private function buildServerURL(): string
 	{
 		global $modSettings;
 		static $url = null;
@@ -1067,11 +1315,17 @@ die;
 		return $url;
 	}
 
-	/*
-		Setup our possible SFS hosts.
-		@resource: https://www.stopforumspam.com/usage
-	*/
-	public function sfsServerMapping($returnType = null)
+	/**
+	 * Setup our possible SFS hosts. 
+	 *
+	 * @internal
+	 * @link: https://www.stopforumspam.com/usage
+	 * @CalledIn SMF 2.0, SMF 2.1
+	 * @version 1.0
+	 * @since 1.0
+	 * @return array The list of servers.
+	 */
+	private function sfsServerMapping($returnType = null)
 	{
 		global $txt;
 
@@ -1106,9 +1360,15 @@ die;
 		return $serverList;
 	}
 
-	/*
-		Verification Options
-	*/
+	/**
+	 * Our possible verification options.
+	 *
+	 * @internal
+	 * @CalledIn SMF 2.0, SMF 2.1
+	 * @version 1.0
+	 * @since 1.0
+	 * @return array The list of servers.
+	 */
 	private function getVerificationOptions()
 	{
 		global $user_info, $modSettings;
@@ -1134,10 +1394,18 @@ die;
 		return $options;
 	}
 
-	/*
-		Defaults for SFS
-		We don't specify all of them here, just what we need to make development easier.
-	*/
+	/**
+	 * Our possible default options.
+	 * We don't specify them all, just ones that make sense for code development.
+	 *
+	 * @param bool $undo If true, we reverse any defaults we set.  Makes the admin page work.
+	 *
+	 * @internal
+	 * @CalledIn SMF 2.0, SMF 2.1
+	 * @version 1.0
+	 * @since 1.0
+	 * @return void Nothing is returned, we inject into $modSettings.
+	 */
 	public function loadDefaults($undo = false)
 	{
 		global $modSettings;
@@ -1173,19 +1441,33 @@ die;
 			}
 	}
 
-	/*
-		Just a wrapper to tell defaults to undo.
-	*/
+	/**
+	 * We undo the defaults letting us save the admin page properly.
+	 *
+	 * @internal
+	 * @CalledIn SMF 2.0, SMF 2.1
+	 * @version 1.0
+	 * @since 1.0
+	 * @return void Nothing is returned, we inject into $modSettings.
+	 */
 	public function unloadDefaults()
 	{
 		return $this->loadDefaults(true);
 	}
 
-	/*
-		Global function to check version and software matches.
-		@CalledIn: SMF 2.0, SMF 2.1
-	*/
-	public function versionCheck($version, $software = 'smf')
+	/**
+	 * Checks if we are matching an array of versions against a specific version.
+	 *
+	 * @param string|array $version The version to check, this is converted to an array later on.
+	 * @param string $software The software we are matching against.
+	 *
+	 * @internal
+	 * @CalledIn SMF 2.0, SMF 2.1
+	 * @version 1.0
+	 * @since 1.0
+	 * @return bool True if we matched a version, false otherwise.
+	 */
+	public function versionCheck($version, string $software = 'smf'): bool
 	{
 		// We can't do this if the software doesn't match.
 		if ($software !== $this->softwareName)
@@ -1201,29 +1483,43 @@ die;
 		return false;
 	}
 
-	/*
-		Global loadLanguage function, should we want to split it out or need to load it differently
-		@CalledIn: SMF 2.0, SMF 2.1
-	*/
-	public function loadLanguage()
+	/**
+	 * A global function for loading our lanague up.
+	 * Placeholder to allow easier additional loading or other software/versions to change this as needed.
+	 *
+	 * @internal
+	 * @CalledIn SMF 2.0, SMF 2.1
+	 * @version 1.0
+	 * @since 1.0
+	 * @return void No return is generated here.
+	 */
+	public function loadLanguage(): void
 	{
 		// Load the langauge.
 		loadLanguage('StopForumSpam');
 	}
 
-	/*
-		Handle searching for logs
-	*/
-	private function handleLogSearch()
+	/**
+	 * Handle searching for logs.
+	 *
+	 * @internal
+	 * @CalledIn SMF 2.0, SMF 2.1
+	 * @version 1.0
+	 * @since 1.0
+	 * @return void No return is generated here.
+	 */
+	private function handleLogSearch(): void
 	{
 		global $context, $txt;
 
+		// If we have some data from a search, lets bring it back out.
 		if (!empty($_REQUEST['params']) && empty($_REQUEST['is_search']))
 		{
 			$this->search_params = base64_decode(strtr($_REQUEST['params'], array(' ' => '+')));
 			$this->search_params = $this->JSONDecode($this->search_params);
 		}
 
+		// What we can search.
 		$searchTypes = array(
 			'url' => array('sql' => 'l.url', 'label' => $txt['sfs_log_search_url']),
 			'member' => array('sql' => 'mem.real_name', 'label' => $txt['sfs_log_search_member']),
@@ -1233,6 +1529,7 @@ die;
 			'ip2' => array('sql' => 'lm.ip2', 'label' => $txt['sfs_log_search_ip2'])
 		);
 
+		// What we want to search for.
 		if (!isset($this->search_params['string']) || (!empty($_REQUEST['search']) && $this->search_params['string'] != $_REQUEST['search']))
 			$this->search_params_string = empty($_REQUEST['search']) ? '' : $_REQUEST['search'];
 		else
