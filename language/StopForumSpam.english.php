@@ -11,6 +11,7 @@ $txt['sfs_general_title'] = 'General Configuration';
 $txt['sfs_enabled'] = 'Enable Stop Forum Spam?';
 $txt['sfs_log_debug'] = 'Enable Logging of all SFS requests (Debugging Only)?';
 $txt['sfs_ipcheck'] = 'Check IP Address?';
+$txt['sfs_ipcheck_autoban'] = 'Automatically ban IPs that are blacklisted?';
 $txt['sfs_usernamecheck'] = 'Check Username?';
 $txt['sfs_emailcheck'] = 'Check Email? (Recommended)';
 
@@ -77,3 +78,10 @@ $txt['sfs_log_types_0'] = 'Debug';
 $txt['sfs_log_types_1'] = 'Username';
 $txt['sfs_log_types_2'] = 'Email';
 $txt['sfs_log_types_3'] = 'IP Address';
+$txt['sfs_log_matched_on'] = 'Matched on %1$s [%2$s]';
+$txt['sfs_log_auto_banned'] = 'Banned';
+
+// The ban group info.
+$txt['sfs_ban_group_name'] = 'SFS Automatic IP Bans';
+$txt['sfs_ban_group_reason'] = 'Your IP has triggered the automatic ban for poor reputation and has been blacklisted';
+$txt['sfs_ban_group_notes'] = 'This Group is automatically created by the Stop Forum Spam Customization and automatically will add IPs that are blacklisted to this group';

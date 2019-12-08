@@ -54,7 +54,7 @@ class SFS
 	 * @version 1.0
 	 * @since 1.0
 	 * @uses integrate_pre_load - Hook SMF2.0
-	 * @uses integrate_pre_load - Hook SMF2.1 
+	 * @uses integrate_pre_load - Hook SMF2.1
 	 * @return void No return is generated
 	 */
 	public static function hook_pre_load(): void
@@ -96,7 +96,7 @@ class SFS
 	 * @version 1.0
 	 * @since 1.0
 	 * @uses integrate__admin_areas - Hook SMF2.0
-	 * @uses integrate__admin_areas - Hook SMF2.1 
+	 * @uses integrate__admin_areas - Hook SMF2.1
 	 * @return void No return is generated
 	 */
 	public static function hook_admin_areas(array &$admin_areas)
@@ -116,7 +116,7 @@ class SFS
 	 * @version 1.0
 	 * @since 1.0
 	 * @uses integrate__admin_areas - Hook SMF2.0
-	 * @uses integrate__admin_areas - Hook SMF2.1 
+	 * @uses integrate__admin_areas - Hook SMF2.1
 	 * @return void No return is generated
 	 */
 	private function setupAdminAreas(array &$admin_areas): void
@@ -242,6 +242,7 @@ class SFS
 			'',
 				array('check', 'sfs_emailcheck'),
 				array('check', 'sfs_ipcheck'),
+				array('check', 'sfs_ipcheck_autoban'),
 				array('check', 'sfs_usernamecheck'),
 			'',
 				array('select', 'sfs_region', $this->sfsServerMapping('config')),
@@ -285,6 +286,10 @@ class SFS
 			$this->unloadDefaults();
 			checkSession();
 
+			// If we are automatically banning IPs, make sure we have a ban group.
+			if (isset($_POST['sfs_ipcheck_autoban']) || empty($modSettings['sfs_ipcheck_autoban_group']))
+				$this->createBanGroup(true);
+
 			saveDBSettings($config_vars);
 
 			writeLog();
@@ -312,7 +317,7 @@ class SFS
 	 * @uses integrate_manage_logs - Hook SMF2.1
 	 * @return void No return is generated
 	 */
-	public static function hook_manage_logs(array &$log_functions):void 
+	public static function hook_manage_logs(array &$log_functions):void
 	{
 		global $smcFunc;
 
@@ -692,8 +697,12 @@ class SFS
 			// This tells us what it matched on exactly.
 			if (strpos($row['result'], ',') !== false)
 			{
-				list($resultType, $resultMatch) = explode(',', $row['result']);
-				$entries[$row['id_sfs']]['result'] = 'Matched on ' . $resultType . ' [' . $resultMatch . ']';
+				list($resultType, $resultMatch, $extra) = explode(',', $row['result'] . ',,,');
+				$entries[$row['id_sfs']]['result'] = sprintf($txt['sfs_log_matched_on'], $resultType, $resultMatch);
+
+				// If this was a IP ban, note it.
+				if ($resultType == 'ip' && !empty($extra))
+					$entries[$row['id_sfs']]['result'] .= ' ' . $txt['sfs_log_auto_banned'];			
 			}
 			else
 				$entries[$row['id_sfs']]['result'] = $row['result'];
@@ -1061,11 +1070,16 @@ class SFS
 		{
 			foreach ($response['ip'] as $check)
 			{
-				// !!! TODO: Frequency 255 is a blacklist, maybe add them to a generic ban list?
+				// They appeared! Block this.
 				if (!empty($check['appears']))
 				{
+					// Ban them because they are black listed?
+					$autoBlackListResult = '0';
+					if (!empty($modSettings['sfs_ipcheck_autoban']) && !empty($check['frequency']) && $check['frequency'] == 255)
+						$autoBlackListResult = $this->BanNewIP($check['value']);
+
 					$this->logBlockedStats('ip', $check);
-					$requestBlocked = 'ip,' . $smcFunc['htmlspecialchars']($check['value']);
+					$requestBlocked = 'ip,' . $smcFunc['htmlspecialchars']($check['value']) . ',' . ($autoBlackListResult ? 1 : 0);
 					break;
 				}
 			}
@@ -1108,7 +1122,7 @@ class SFS
 			$this->logAllStats('all', $checks, $requestBlocked);
 
 		// At this point, we have checked everything, do what needs to be done for our good person.
-		if (!$requestBlocked)
+		if (empty($requestBlocked))
 			return true;
 
 		// You are a bad spammer, don't tell them what was blocked.
@@ -1220,7 +1234,7 @@ class SFS
 				$user_info['ip'],
 				$user_info['ip2'],
 				json_encode($checks),
-				$requestBlocked,
+				$DebugMessage,
 				),
 			array('id_sfs', 'id_type')
 		);
@@ -1229,7 +1243,7 @@ class SFS
 	/**
 	 * Decode JSON data and return it.
 	 * If we have $smcFunc['json_decode'], we use this as it handles errors natively.
-	 * For all others, we simply ensure a proper array is returned in the event of a error. 
+	 * For all others, we simply ensure a proper array is returned in the event of a error.
 	 *
 	 * @param string $requestData A properly formatted json string.
 	 *
@@ -1251,8 +1265,7 @@ class SFS
 		{
 			$data = @json_decode($requestData, true);
 
-			// We got a error, return nothing.
-			// !!! TODO: Log this?
+			// We got a error, return nothing.  Don't log this, not worth it.
 			if (json_last_error() !== JSON_ERROR_NONE)
 				return array();
 			return $data;
@@ -1260,7 +1273,7 @@ class SFS
 	}
 
 	/**
-	 * Build the SFS Server URL based on our configuration setup. 
+	 * Build the SFS Server URL based on our configuration setup.
 	 *
 	 * @internal
 	 * @link: https://www.stopforumspam.com/usage
@@ -1316,7 +1329,7 @@ class SFS
 	}
 
 	/**
-	 * Setup our possible SFS hosts. 
+	 * Setup our possible SFS hosts.
 	 *
 	 * @internal
 	 * @link: https://www.stopforumspam.com/usage
@@ -1385,7 +1398,7 @@ class SFS
 			$options = array();
 
 		// Extras.
-		if (!empty($modSettings[$optionsKeyExtra])) 
+		if (!empty($modSettings[$optionsKeyExtra]))
 		{
 			$this->extraVerificationOptions = explode(',', $modSettings[$optionsKeyExtra]);
 			$options = array_merge($options, $this->extraVerificationOptions);
@@ -1553,6 +1566,237 @@ class SFS
 			'type' => $this->search_params['type'],
 			'label' => $searchTypes[$this->search_params_type]['label'],
 		);
+	}
 
+	/**
+	 * Create a Ban Group if needed to handle automatic IP bans.
+	 * We attempt to use the known ban function to create bans, otherwise we just fall back to a standard insert.
+	 *
+	 * @internal
+	 * @CalledIn SMF 2.0, SMF 2.1
+	 * @version 1.1
+	 * @since 1.0
+	 * @return bool True upon success, false otherwise.
+	 */
+	private function createBanGroup(bool $noChecks = false): bool
+	{
+		global $smcFunc, $modSettings, $sourcedir, $txt;
+
+		// Is this disabled? Don't do it.
+		if (empty($noChecks) && empty($modSettings['sfs_ipcheck_autoban']))
+			return false;
+
+		// Maybe just got unlinked, if we can find the matching name, relink it.
+		$request = $smcFunc['db_query']('', '
+			SELECT id_ban_group
+			FROM {db_prefix}ban_groups
+			WHERE name = {string:new_ban_name}' . '
+			LIMIT 1',
+			array(
+				'new_ban_name' => $txt['sfs_ban_group_name'],
+			)
+		);
+		if ($smcFunc['db_num_rows']($request) == 1)
+		{
+			$ban_data = $smcFunc['db_fetch_assoc']($result);
+			$smcFunc['db_free_result']($request);
+
+			if (!empty($ban_data['id_ban_group']))
+			{
+				updateSettings(array('sfs_ipcheck_autoban_group' => $ban_data['id_ban_group']));
+				return true;
+			}
+		}
+		$smcFunc['db_free_result']($request);
+
+		require_once($sourcedir . '/ManageBans.php');
+
+		// Ban Information, this follows the format from the function.
+		$ban_info = array(
+			'name' => $txt['sfs_ban_group_name'],
+			'cannot' => array(
+				'access' => 1,
+				'register' => 1,
+				'post' => 1,
+				'login' => 1,
+			),
+			'db_expiration' => 'NULL',
+			'reason' => $txt['sfs_ban_group_reason'],
+			'notes' => $txt['sfs_ban_group_notes']
+		);
+
+		// If we can shortcut this..
+		$ban_group_id = 0;
+		if (function_exists('insertBanGroup'))
+			$ban_group_id = insertBanGroup($ban_info);
+
+		// Fall back.
+		if (is_array($ban_group_id) || empty($ban_group_id))
+		{
+			$smcFunc['db_insert']('',
+				'{db_prefix}ban_groups',
+				array(
+					'name' => 'string-20', 'ban_time' => 'int', 'expire_time' => 'raw', 'cannot_access' => 'int', 'cannot_register' => 'int',
+					'cannot_post' => 'int', 'cannot_login' => 'int', 'reason' => 'string-255', 'notes' => 'string-65534',
+				),
+				array(
+					$ban_info['name'], time(), $ban_info['db_expiration'], $ban_info['cannot']['access'], $ban_info['cannot']['register'],
+					$ban_info['cannot']['post'], $ban_info['cannot']['login'], $ban_info['reason'], $ban_info['notes'],
+				),
+				array('id_ban_group'),
+				1
+			);
+			$ban_group_id = $smcFunc['db_insert_id']('{db_prefix}ban_groups', 'id_ban_group');
+		}
+
+		// Didn't work? Try again later.
+		if (empty($ban_group_id))
+			return false;
+
+		updateSettings(array('sfs_ipcheck_autoban_group' => $ban_group_id));
+		return true;
+	}
+
+	/**
+	 * They have triggered a automatic IP ban, lets do it.
+	 * In newer versions we attempt to use more of the APIs, but fall back as needed.
+	 *
+	 * @param string $ip_address The IP address of the spammer.
+	 *
+	 * @internal
+	 * @CalledIn SMF 2.0, SMF 2.1
+	 * @version 1.1
+	 * @since 1.0
+	 * @return bool True upon success, false otherwise.
+	 */
+	private function BanNewIP(string $ip_address): bool
+	{
+		global $smcFunc, $modSettings, $sourcedir;
+
+		// Is this disabled? Don't do it.
+		if (empty($modSettings['sfs_ipcheck_autoban']))
+			return false;
+
+		// Did we loose our Ban Group? Try to fix this.
+		if (empty($modSettings['sfs_ipcheck_autoban_group']))
+			$this->createBanGroup();
+
+		// Still no Ban Group? Bail out.
+		if (empty($modSettings['sfs_ipcheck_autoban_group']))
+			return false;
+
+		require_once($sourcedir . '/ManageBans.php');
+
+		// If we have it, use the standard function.
+		if (function_exists('insertBanGroup'))
+		{
+			// We don't call checkExistingTriggerIP as it induces a fatal error.
+			$request = $smcFunc['db_query']('', '
+				SELECT bg.id_ban_group, bg.name
+				FROM {db_prefix}ban_groups AS bg
+				INNER JOIN {db_prefix}ban_items AS bi ON
+					(bi.id_ban_group = bg.id_ban_group)
+					AND ip_low = {inet:ip_low} AND ip_high = {inet:ip_high}
+				LIMIT 1',
+				array(
+					'ip_low' => $ip_address,
+					'ip_high' => $ip_address,
+				)
+			);
+			// Alredy exists, bail out.
+			if ($smcFunc['db_num_rows']($request) != 0)
+			{
+				$smcFunc['db_free_result']($request);
+				return false;
+			}
+
+			// The trigger info.
+			$triggers = array(
+				array(
+					'ip_low' => $ip_address,
+					'ip_high' => $ip_address,
+				)
+			);
+
+			// Add it.
+			addTriggers($modSettings['sfs_ipcheck_autoban_group'], $triggers);
+		}
+		// Go old school.
+		else
+		{
+			$ip_parts = ip2range($ip_address);
+
+			// Not valid? Get out.
+			if (count($ip_parts) != 4)
+				return false;
+
+			// We don't call checkExistingTriggerIP as it induces a fatal error.
+			$request = $smcFunc['db_query']('', '
+				SELECT bg.id_ban_group, bg.name
+				FROM {db_prefix}ban_groups AS bg
+				INNER JOIN {db_prefix}ban_items AS bi ON
+					(bi.id_ban_group = bg.id_ban_group)
+					AND ip_low1 = {int:ip_low1} AND ip_high1 = {int:ip_high1}
+					AND ip_low2 = {int:ip_low2} AND ip_high2 = {int:ip_high2}
+					AND ip_low3 = {int:ip_low3} AND ip_high3 = {int:ip_high3}
+					AND ip_low4 = {int:ip_low4} AND ip_high4 = {int:ip_high4}
+				LIMIT 1',
+				array(
+					'ip_low1' => $ip_parts[0]['low'],
+					'ip_high1' => $ip_parts[0]['high'],
+					'ip_low2' => $ip_parts[1]['low'],
+					'ip_high2' => $ip_parts[1]['high'],
+					'ip_low3' => $ip_parts[2]['low'],
+					'ip_high3' => $ip_parts[2]['high'],
+					'ip_low4' => $ip_parts[3]['low'],
+					'ip_high4' => $ip_parts[3]['high'],
+				)
+			);
+			// Alredy exists, bail out.
+			if ($smcFunc['db_num_rows']($request) != 0)
+			{
+				$smcFunc['db_free_result']($request);
+				return false;
+			}
+
+			$ban_triggers[] = array(
+				$modSettings['sfs_ipcheck_autoban_group'],
+				$ip_parts[0]['low'],
+				$ip_parts[0]['high'],
+				$ip_parts[1]['low'],
+				$ip_parts[1]['high'],
+				$ip_parts[2]['low'],
+				$ip_parts[2]['high'],
+				$ip_parts[3]['low'],
+				$ip_parts[3]['high'],
+				'',
+				'',
+				0,
+			);
+
+			$smcFunc['db_insert']('',
+				'{db_prefix}ban_items',
+				array(
+					'id_ban_group' => 'int', 'ip_low1' => 'int', 'ip_high1' => 'int', 'ip_low2' => 'int', 'ip_high2' => 'int',
+					'ip_low3' => 'int', 'ip_high3' => 'int', 'ip_low4' => 'int', 'ip_high4' => 'int', 'hostname' => 'string-255',
+					'email_address' => 'string-255', 'id_member' => 'int',
+				),
+				$ban_triggers,
+				array('id_ban')
+			);
+		}
+
+		// Log this.  The log will show from the user/guest and ip of spammer.
+		logAction('ban', array(
+			'ip_range' => $ip_address,
+			'new' => 1,
+			'source' => 'sfs'
+		));
+
+		// Let things know we need updated ban data.
+		updateSettings(array('banLastUpdated' => time()));
+		updateBanMembers();
+
+		return true;
 	}
 }
