@@ -469,7 +469,7 @@ class SFS
 					'data' => array(
 						'db' => 'url',
 						'class' => 'smalltext',
-						'style' => 'word-break: break-all;',
+						'style' => 'word-break: break-word;',
 					),
 					'sort' => array(
 						'default' => 'l.url DESC',
@@ -554,6 +554,7 @@ class SFS
 					'data' => array(
 						'db' => 'checks',
 						'class' => 'smalltext',
+						'style' => 'word-break: break-word;',
 					),
 					'sort' => array(),
 				),
@@ -565,6 +566,7 @@ class SFS
 					'data' => array(
 						'db' => 'result',
 						'class' => 'smalltext',
+						'style' => 'word-break: break-word;',
 					),
 					'sort' => array(),
 				),
