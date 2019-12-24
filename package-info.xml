@@ -67,10 +67,10 @@
 		<hook hook="integrate_manage_logs" function="SFS::hook_manage_logs" reverse="true" />
 
 		<!-- language files, removed -->
-		<remove-dir name="$themes_dir/default/languages/StopForumSpam.english.php" />
+		<remove-file name="$themes_dir/default/languages/StopForumSpam.english.php" />
 
 		<!-- source files, removed -->
-		<remove-dir name="$sourcedir/StopForumSpam.php" />
+		<remove-file name="$sourcedir/StopForumSpam.php" />
 	</uninstall>
 
 </package-info>
