@@ -41,6 +41,8 @@ class SFS
 	private $search_params_column = '';
 	private $search_params_string = null;
 	private $search_params_type = null;
+	private $canDeleteLogs = false;
+	private $logSearch = array();
 
 	/**
 	 * @var int How long we disable removing logs.
@@ -402,15 +404,14 @@ class SFS
 
 		loadLanguage('Modlog');
 
-		$context['url_start'] = $this->adminLogURL;
+		$context['form_url'] = $this->adminLogURL;
+		$context['log_url'] = $this->adminLogURL;
 		$context['page_title'] = $this->txt('sfs_admin_logs');
-		$context['can_delete'] = allowedTo('admin_forum');
+		$this->canDeleteLogs = allowedTo('admin_forum');
 
 		// Remove all..
-		if (isset($_POST['removeall']) && $context['can_delete'])
-			$this->removeAllLogs();
-		elseif (!empty($_POST['remove']) && isset($_POST['delete']) && $context['can_delete'])
-			$this->removeLogs(array_unique($_POST['delete']));
+		if ((isset($_POST['removeall']) || isset($_POST['delete'])) && $this->canDeleteLogs)
+			$this->handleLogDeletes();
 
 		$sort_types = array(
 			'id_type' =>'l.id_type',
@@ -426,7 +427,7 @@ class SFS
 		$context['order'] = isset($_REQUEST['sort']) && isset($sort_types[$_REQUEST['sort']]) ? $_REQUEST['sort'] : 'time';
 
 		// Handle searches.
-		$this->handleLogSearch();
+		$this->handleLogSearch($context['log_url']);
 
 		require_once($sourcedir . '/Subs-List.php');
 
@@ -436,22 +437,10 @@ class SFS
 			'width' => '100%',
 			'items_per_page' => '50',
 			'no_items_label' => $this->txt('sfs_log_no_entries_found'),
-			'base_href' => $context['url_start'] . (!empty($context['search_params']) ? ';params=' . $context['search_params'] : ''),
+			'base_href' => $context['log_url'],
 			'default_sort_col' => 'time',
-			'get_items' => array(
-				'function' => array($this, 'getSFSLogEntries'),
-				'params' => array(
-					(!empty($this->search_params['string']) ? ' INSTR({raw:sql_type}, {string:search_string})' : ''),
-					array('sql_type' => $this->search_params_column, 'search_string' => $this->search_params['string']),
-				),
-			),
-			'get_count' => array(
-				'function' => array($this, 'getSFSLogEntriesCount'),
-				'params' => array(
-					(!empty($this->search_params['string']) ? ' INSTR({raw:sql_type}, {string:search_string})' : ''),
-					array('sql_type' => $this->search_params_column, 'search_string' => $this->search_params['string']),
-				),
-			),
+			'get_items' => $this->loadLogsGetItems(),
+			'get_count' => $this->loadLogsGetCount(),
 			// This assumes we are viewing by user.
 			'columns' => array(
 				'type' => $this->loadLogsColumnType(),
@@ -467,7 +456,7 @@ class SFS
 				'delete' => $this->loadLogsColumnDelete(),
 			),
 			'form' => array(
-				'href' => $context['url_start'],
+				'href' => $context['form_url'],
 				'include_sort' => true,
 				'include_start' => true,
 				'hidden_fields' => array(
@@ -476,15 +465,7 @@ class SFS
 				),
 			),
 			'additional_rows' => array(
-				array(
-					'position' => 'below_table_data',
-					'value' => '
-						' . $this->txt('sfs_log_search') . ' (' . $context['search']['label'] . '):
-						<input type="text" name="search" size="18" value="' . $smcFunc['htmlspecialchars']($context['search']['string']) . '" class="input_text" /> <input type="submit" name="is_search" value="' . $this->txt('modlog_go') . '" class="button_submit" />
-						' . ($context['can_delete'] ? ' |
-							<input type="submit" name="remove" value="' . $this->txt('modlog_remove') . '" class="button_submit" />
-							<input type="submit" name="removeall" value="' . $this->txt('modlog_removeall') . '" class="button_submit" />' : ''),
-				),
+				$this->loadLogsGetAddtionalRow(),
 			),
 		);
 
@@ -498,6 +479,88 @@ class SFS
 	}
 
 	/**
+	 * Handle when we want to delete a log and what to do.
+	 *
+	 * @internal
+	 * @CalledIn SMF2.0, SMF 2.1
+	 * @version 1.1
+	 * @since 1.1
+	 * @return void Nothing is returned, the logs are deleted as requested and admin redirected.
+	 */
+	private function handleLogDeletes(): void
+	{
+		if (isset($_POST['removeall']) && $this->canDeleteLogs)
+			$this->removeAllLogs();
+		elseif (!empty($_POST['remove']) && isset($_POST['delete']) && $this->canDeleteLogs)
+			$this->removeLogs(array_unique($_POST['delete']));
+	}
+
+	/**
+	 * loadLogs - Get Items.
+	 *
+	 * @internal
+	 * @CalledIn SMF2.0, SMF 2.1
+	 * @version 1.1
+	 * @since 1.1
+	 * @return array The options for the get_items
+	 */
+	private function loadLogsGetItems(): array
+	{
+		return array(
+			'function' => array($this, 'getSFSLogEntries'),
+			'params' => array(
+				(!empty($this->search_params['string']) ? ' INSTR({raw:sql_type}, {string:search_string})' : ''),
+				array('sql_type' => $this->search_params_column, 'search_string' => $this->search_params['string']),
+			),
+		);
+	}
+
+	/**
+	 * loadLogs - Get Count.
+	 *
+	 * @internal
+	 * @CalledIn SMF2.0, SMF 2.1
+	 * @version 1.1
+	 * @since 1.1
+	 * @return array The options for the get_items
+	 */
+	private function loadLogsGetCount(): array
+	{
+		return array(
+			'function' => array($this, 'getSFSLogEntriesCount'),
+			'params' => array(
+				(!empty($this->search_params['string']) ? ' INSTR({raw:sql_type}, {string:search_string})' : ''),
+				array('sql_type' => $this->search_params_column, 'search_string' => $this->search_params['string']),
+			),
+		);
+	}
+
+	/**
+	 * loadLogs - Load an additional row, for mostly deleting stuff.
+	 *
+	 * @internal
+	 * @CalledIn SMF2.0, SMF 2.1
+	 * @version 1.1
+	 * @since 1.1
+	 * @return array The options for the get_items
+	 */
+	private function loadLogsGetAddtionalRow(): array
+	{
+		global $smcFunc;
+
+		return array(
+			'position' => 'below_table_data',
+			'value' => '
+				' . $this->txt('sfs_log_search') . ' (' . $this->logSearch['label'] . '):
+				<input type="text" name="search" size="18" value="' . $smcFunc['htmlspecialchars']($this->logSearch['string']) . '" class="input_text" /> <input type="submit" name="is_search" value="' . $this->txt('modlog_go') . '" class="button_submit" />
+				' . ($this->canDeleteLogs ? ' |
+					<input type="submit" name="remove" value="' . $this->txt('modlog_remove') . '" class="button_submit" />
+					<input type="submit" name="removeall" value="' . $this->txt('modlog_removeall') . '" class="button_submit" />' : ''),
+		);
+	}
+
+
+	/**
 	 * loadLogs - Column - Type.
 	 *
 	 * @internal
@@ -506,7 +569,7 @@ class SFS
 	 * @since 1.1
 	 * @return array The options for the column
 	 */
-	function loadLogsColumnType(): array
+	private function loadLogsColumnType(): array
 	{
 		return array(
 			'header' => array(
@@ -531,7 +594,7 @@ class SFS
 	 * @since 1.1
 	 * @return array The options for the column
 	 */
-	function loadLogsColumnTime(): array
+	private function loadLogsColumnTime(): array
 	{
 		return array(
 			'header' => array(
@@ -558,7 +621,7 @@ class SFS
 	 * @since 1.1
 	 * @return array The options for the column
 	 */
-	function loadLogsColumnURL(): array
+	private function loadLogsColumnURL(): array
 	{
 		return array(
 			'header' => array(
@@ -586,7 +649,7 @@ class SFS
 	 * @since 1.1
 	 * @return array The options for the column
 	 */
-	function loadLogsColumnMember(): array
+	private function loadLogsColumnMember(): array
 	{
 		return array(
 			'header' => array(
@@ -613,7 +676,7 @@ class SFS
 	 * @since 1.1
 	 * @return array The options for the column
 	 */
-	function loadLogsColumnUsername(): array
+	private function loadLogsColumnUsername(): array
 	{
 		return array(
 			'header' => array(
@@ -640,7 +703,7 @@ class SFS
 	 * @since 1.1
 	 * @return array The options for the column
 	 */
-	function loadLogsColumnEmail(): array
+	private function loadLogsColumnEmail(): array
 	{
 		return array(
 			'header' => array(
@@ -668,7 +731,7 @@ class SFS
 	 * @since 1.1
 	 * @return array The options for the column
 	 */
-	function loadLogsColumnIP(bool $ip2 = false): array
+	private function loadLogsColumnIP(bool $ip2 = false): array
 	{
 		return array(
 			'header' => array(
@@ -695,7 +758,7 @@ class SFS
 	 * @since 1.1
 	 * @return array The options for the column
 	 */
-	function loadLogsColumnChecks(): array
+	private function loadLogsColumnChecks(): array
 	{
 		return array(
 			'header' => array(
@@ -720,7 +783,7 @@ class SFS
 	 * @since 1.1
 	 * @return array The options for the column
 	 */
-	function loadLogsColumnResult(): array
+	private function loadLogsColumnResult(): array
 	{
 		return array(
 			'header' => array(
@@ -745,7 +808,7 @@ class SFS
 	 * @since 1.1
 	 * @return array The options for the column
 	 */
-	function loadLogsColumnDelete(): array
+	private function loadLogsColumnDelete(): array
 	{
 		return array(
 			'header' => array(
@@ -1063,53 +1126,105 @@ class SFS
 
 		// Posting?
 		if ($thisVerification['id'] == 'post' && in_array('post', $options))
-		{
-			// Guests!
-			if ($user_info['is_guest'])
-			{
-				$guestname = !isset($_POST['guestname']) ? '' : trim($_POST['guestname']);
-				$email = !isset($_POST['email']) ? '' : trim($_POST['email']);
-
-				return $this->sfsCheck(array(
-					array('username' => $guestname),
-					array('email' => $email),
-					array('ip' => $user_info['ip']),
-					array('ip' => $user_info['ip2']),
-				), 'post');
-				
-			}
-			// Members and they don't have enough posts?
-			elseif (empty($user_info['posts']) || $user_info['posts'] < $modSettings['sfs_verfOptMemPostThreshold'])
-				return $this->sfsCheck(array(
-					array('username' => $user_info['username']),
-					array('email' => $user_info['email']),
-					array('ip' => $user_info['ip']),
-					array('ip' => $user_info['ip2']),
-				), 'post');
-			else
-				return true;
-		}
+			return $this->checkVerificationTestPosts();
 		// reporting topics is only for guests.
 		elseif ($thisVerification['id'] == 'report' && in_array('report', $options))
+			return $this->checkVerificationTestReport();
+		// We should avoid this on searches, as we can only send ips.
+		elseif ($thisVerification['id'] == 'search' && in_array('search', $options) && ($user_info['is_guest'] || empty($user_info['posts']) || $user_info['posts'] < $modSettings['sfs_verfOptMemPostThreshold']))
+			return $this->checkVerificationTestSearch();
+
+		// Others areas.  We have to play a guessing game here.
+		return $this->checkVerificationTestExtra($thisVerification);
+	}
+
+	/**
+	 * Test for a standard post.
+	 *
+	 * @internal
+	 * @CalledIn SMF 2.0, SMF 2.1
+	 * @version 1.1
+	 * @since 1.1
+	 * @return bool True is success, no other bool is expeicifcly defined yet.
+	 */
+	private function checkVerificationTestPosts(): bool
+	{
+		global $user_info, $modSettings;
+
+		// Guests!
+		if ($user_info['is_guest'])
 		{
+			$guestname = !isset($_POST['guestname']) ? '' : trim($_POST['guestname']);
 			$email = !isset($_POST['email']) ? '' : trim($_POST['email']);
 
 			return $this->sfsCheck(array(
+				array('username' => $guestname),
 				array('email' => $email),
 				array('ip' => $user_info['ip']),
 				array('ip' => $user_info['ip2']),
 			), 'post');
+			
 		}
-		// We should avoid this on searches, as we can only send ips.
-		elseif ($thisVerification['id'] == 'search' && in_array('search', $options) && ($user_info['is_guest'] || empty($user_info['posts']) || $user_info['posts'] < $modSettings['sfs_verfOptMemPostThreshold']))
-		{
+		// Members and they don't have enough posts?
+		elseif (empty($user_info['posts']) || $user_info['posts'] < $modSettings['sfs_verfOptMemPostThreshold'])
 			return $this->sfsCheck(array(
+				array('username' => $user_info['username']),
+				array('email' => $user_info['email']),
 				array('ip' => $user_info['ip']),
 				array('ip' => $user_info['ip2']),
-			), 'search');
-		}
+			), 'post');
+		else
+			return true;
+	}
 
-		// Others areas.  We have to play a guessing game here.
+	/**
+	 * Test for a report.
+	 *
+	 * @internal
+	 * @CalledIn SMF 2.0, SMF 2.1
+	 * @version 1.1
+	 * @since 1.1
+	 * @return bool True is success, no other bool is expeicifcly defined yet.
+	 */
+	private function checkVerificationTestReport(): bool
+	{
+		$email = !isset($_POST['email']) ? '' : trim($_POST['email']);
+
+		return $this->sfsCheck(array(
+			array('email' => $email),
+			array('ip' => $user_info['ip']),
+			array('ip' => $user_info['ip2']),
+		), 'post');
+	}
+
+	/**
+	 * Test for a Search.
+	 *
+	 * @internal
+	 * @CalledIn SMF 2.0, SMF 2.1
+	 * @version 1.1
+	 * @since 1.1
+	 * @return bool True is success, no other bool is expeicifcly defined yet.
+	 */
+	private function checkVerificationTestSearch(): bool
+	{
+		return $this->sfsCheck(array(
+			array('ip' => $user_info['ip']),
+			array('ip' => $user_info['ip2']),
+		), 'search');
+	}
+
+	/**
+	 * Test for extras, customizations and other areas that we want to tie in.
+	 *
+	 * @internal
+	 * @CalledIn SMF 2.0, SMF 2.1
+	 * @version 1.1
+	 * @since 1.1
+	 * @return bool True is success, no other bool is expeicifcly defined yet.
+	 */
+	private function checkVerificationTestExtra(array $thisVerification): bool
+	{
 		foreach ($this->extraVerificationOptions as $option)
 		{
 			// Not a match.
@@ -1421,7 +1536,7 @@ class SFS
 		global $smcFunc, $user_info;
 
 		// What type of log is this?
-		switch($type)
+		switch ($type)
 		{
 			case 'username':
 				$blockType = 1;
@@ -1573,7 +1688,7 @@ class SFS
 		$url = 'https://' . $server['host'] . '/api?json';
 
 		// Ignore all wildcard checks?
-		if (!empty($modSettings['sfs_wildcard_email']) && !empty($modSettings['sfs_wildcard_username'])  && !empty($modSettings['sfs_wildcard_ip']))
+		if (!empty($modSettings['sfs_wildcard_email']) && !empty($modSettings['sfs_wildcard_username']) && !empty($modSettings['sfs_wildcard_ip']))
 			$url .= '&nobadall';
 		// Maybe only certain wildcards are ignored?
 		else
@@ -1821,13 +1936,14 @@ class SFS
 	/**
 	 * Handle searching for logs.
 	 *
+	 * @param string $url The base_href
 	 * @internal
 	 * @CalledIn SMF 2.0, SMF 2.1
 	 * @version 1.0
 	 * @since 1.0
 	 * @return void No return is generated here.
 	 */
-	private function handleLogSearch(): void
+	private function handleLogSearch(string &$string): void
 	{
 		global $context, $txt;
 
@@ -1867,11 +1983,14 @@ class SFS
 
 		// Setup the search context.
 		$context['search_params'] = empty($this->search_params['string']) ? '' : base64_encode(json_encode($this->search_params));
-		$context['search'] = array(
+		$this->logSearch = array(
 			'string' => $this->search_params['string'],
 			'type' => $this->search_params['type'],
 			'label' => $searchTypes[$this->search_params_type]['label'],
 		);
+
+		if (!empty($context['search_params']))
+			$url .= ';params=' . $context['search_params'];
 	}
 
 	/**
