@@ -182,3 +182,10 @@ build:
             tests:
                 override:
                     - php-scrutinizer-run
+            dependencies:
+                after:
+                    - git clone https://github.com/SimpleMachines/SMF2.1 smf
+
+filter:
+    dependency_paths:
+        - smf/
