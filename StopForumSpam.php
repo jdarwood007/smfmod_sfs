@@ -123,10 +123,7 @@ class SFS
 	 */
 	private function setupAdminAreas(array &$admin_areas): void
 	{
-		global $txt, $scripturl;
-
-		// Get our language in here.
-		$this->loadLanguage();
+		global $scripturl;
 
 		// Add the menu item.
 		if ($this->versionCheck('2.0', 'smf'))
@@ -135,10 +132,10 @@ class SFS
 			$this->adminLogURL = $scripturl . '?action=admin;area=modsettings;sa=sfslog';
 
 			$admin_areas['config']['areas']['modsettings']['subsections']['sfs'] = array(
-				$txt['sfs_admin_area']
+				$this->txt('sfs_admin_area')
 			);
 			$admin_areas['config']['areas']['modsettings']['subsections']['sfslog'] = array(
-				$txt['sfs_admin_logs']
+				$this->txt('sfs_admin_logs')
 			);
 		}
 		else
@@ -147,10 +144,10 @@ class SFS
 			$this->adminLogURL = $scripturl . '?action=admin;area=logs;sa=sfslog';
 
 			$admin_areas['config']['areas']['securitysettings']['subsections']['sfs'] = array(
-				$txt['sfs_admin_area']
+				$this->txt('sfs_admin_area')
 			);
 			$admin_areas['config']['areas']['securitysettings']['subsections']['sfslog'] = array(
-				$txt['sfs_admin_logs']
+				$this->txt('sfs_admin_logs')
 			);
 		}
 	}
@@ -234,10 +231,10 @@ class SFS
 	 */
 	private function setupSFSConfiguration(bool $return_config = false): array
 	{
-		global $txt, $scripturl, $context, $settings, $sc, $modSettings;
+		global $scripturl, $context, $settings, $sc, $modSettings;
 
 		$config_vars = array(
-				array('title', 'sfsgentitle', 'label' => $txt['sfs_general_title']),
+				array('title', 'sfsgentitle', 'label' => $this->txt('sfs_general_title')),
 
 				array('check', 'sfs_enabled'),
 				array('int', 'sfs_expire'),
@@ -257,28 +254,28 @@ class SFS
 				array('check', 'sfs_wildcard_ip'),
 			'',
 				array('select', 'sfs_tor_check', array(
-					0 => $txt['sfs_tor_check_block'],
-					1 => $txt['sfs_tor_check_ignore'],
-					2 => $txt['sfs_tor_check_bad'],
+					0 => $this->txt('sfs_tor_check_block'),
+					1 => $this->txt('sfs_tor_check_ignore'),
+					2 => $this->txt('sfs_tor_check_bad'),
 				)),
 
 			'',
-				array('title', 'sfsverftitle', 'label' => $txt['sfs_verification_title']),
-				array('desc', 'sfsverfdesc', 'label' => $txt['sfs_verification_desc']),
+				array('title', 'sfsverftitle', 'label' => $this->txt('sfs_verification_title')),
+				array('desc', 'sfsverfdesc', 'label' => $this->txt('sfs_verification_desc')),
 				array('select', 'sfs_verification_options', array(
-					'post' => $txt['sfs_verification_options_post'],
-					'report' => $txt['sfs_verification_options_report'],
-					'search' => $txt['sfs_verification_options_search'],
+					'post' => $this->txt('sfs_verification_options_post'),
+					'report' => $this->txt('sfs_verification_options_report'),
+					'search' => $this->txt('sfs_verification_options_search'),
 				), 'multiple' => true),			
-				array('text', 'sfs_verification_options_extra', 'subtext' => $txt['sfs_verification_options_extra_subtext']),
+				array('text', 'sfs_verification_options_extra', 'subtext' => $this->txt('sfs_verification_options_extra_subtext')),
 
 			'',
-				array('select', 'sfs_verification_options_members', array(
-					'post' => $txt['sfs_verification_options_post'],
-					'search' => $txt['sfs_verification_options_search'],
+				array('select', 'sfs_verOptionsMembers', array(
+					'post' => $this->txt('sfs_verification_options_post'),
+					'search' => $this->txt('sfs_verification_options_search'),
 				), 'multiple' => true),
-				array('text', 'sfs_verification_options_membersextra', 'subtext' => $txt['sfs_verification_options_extra_subtext']),
-				array('int', 'sfs_verification_options_members_post_threshold'),
+				array('text', 'sfs_verOptionsMemExtra', 'subtext' => $this->txt('sfs_verification_options_extra_subtext')),
+				array('int', 'sfs_verfOptMemPostThreshold'),
 			'',
 				array('check', 'sfs_log_debug'),
 		);
@@ -333,7 +330,7 @@ class SFS
 
 		// Add it to the menu as well.
 		$context[$context['admin_menu_name']]['tab_data']['tabs']['sfslog'] = array(
-			'description' => $txt['sfs_admin_logs'],
+			'description' => $this->txt('sfs_admin_logs'),
 		);
 	}
 
@@ -377,7 +374,7 @@ class SFS
 	 */
 	public function loadLogs(bool $return_config = false): array
 	{
-		global $context, $txt, $smcFunc, $sourcedir;
+		global $context, $smcFunc, $sourcedir;
 
 		// No Configs.
 		if ($return_config)
@@ -386,7 +383,7 @@ class SFS
 		loadLanguage('Modlog');
 
 		$context['url_start'] = $this->adminLogURL;
-		$context['page_title'] = $txt['sfs_admin_logs'];
+		$context['page_title'] = $this->txt('sfs_admin_logs');
 		$context['can_delete'] = allowedTo('admin_forum');
 
 		// Remove all..
@@ -415,10 +412,10 @@ class SFS
 
 		$listOptions = array(
 			'id' => 'sfslog_list',
-			'title' => $txt['sfs_admin_logs'],
+			'title' => $this->txt('sfs_admin_logs'),
 			'width' => '100%',
 			'items_per_page' => '50',
-			'no_items_label' => $txt['sfs_log_no_entries_found'],
+			'no_items_label' => $this->txt('sfs_log_no_entries_found'),
 			'base_href' => $context['url_start'] . (!empty($context['search_params']) ? ';params=' . $context['search_params'] : ''),
 			'default_sort_col' => 'time',
 			'get_items' => array(
@@ -439,7 +436,7 @@ class SFS
 			'columns' => array(
 				'type' => array(
 					'header' => array(
-						'value' => $txt['sfs_log_header_type'],
+						'value' => $this->txt('sfs_log_header_type'),
 						'class' => 'lefttext',
 					),
 					'data' => array(
@@ -451,7 +448,7 @@ class SFS
 				),
 				'time' => array(
 					'header' => array(
-						'value' => $txt['sfs_log_header_time'],
+						'value' => $this->txt('sfs_log_header_time'),
 						'class' => 'lefttext',
 					),
 					'data' => array(
@@ -465,7 +462,7 @@ class SFS
 				),
 				'url' => array(
 					'header' => array(
-						'value' => $txt['sfs_log_header_url'],
+						'value' => $this->txt('sfs_log_header_url'),
 						'class' => 'lefttext',
 					),
 					'data' => array(
@@ -480,7 +477,7 @@ class SFS
 				),
 				'member' => array(
 					'header' => array(
-						'value' => $txt['sfs_log_header_member'],
+						'value' => $this->txt('sfs_log_header_member'),
 						'class' => 'lefttext',
 					),
 					'data' => array(
@@ -494,7 +491,7 @@ class SFS
 				),
 				'username' => array(
 					'header' => array(
-						'value' => $txt['sfs_log_header_username'],
+						'value' => $this->txt('sfs_log_header_username'),
 						'class' => 'lefttext',
 					),
 					'data' => array(
@@ -508,7 +505,7 @@ class SFS
 				),
 				'email' => array(
 					'header' => array(
-						'value' => $txt['sfs_log_header_email'],
+						'value' => $this->txt('sfs_log_header_email'),
 						'class' => 'lefttext',
 					),
 					'data' => array(
@@ -522,7 +519,7 @@ class SFS
 				),
 				'ip' => array(
 					'header' => array(
-						'value' => $txt['sfs_log_header_ip'],
+						'value' => $this->txt('sfs_log_header_ip'),
 						'class' => 'lefttext',
 					),
 					'data' => array(
@@ -536,7 +533,7 @@ class SFS
 				),
 				'ip2' => array(
 					'header' => array(
-						'value' => $txt['sfs_log_header_ip2'],
+						'value' => $this->txt('sfs_log_header_ip2'),
 						'class' => 'lefttext',
 					),
 					'data' => array(
@@ -550,7 +547,7 @@ class SFS
 				),
 				'checks' => array(
 					'header' => array(
-						'value' => $txt['sfs_log_checks'],
+						'value' => $this->txt('sfs_log_checks'),
 						'class' => 'lefttext',
 					),
 					'data' => array(
@@ -562,7 +559,7 @@ class SFS
 				),
 				'result' => array(
 					'header' => array(
-						'value' => $txt['sfs_log_result'],
+						'value' => $this->txt('sfs_log_result'),
 						'class' => 'lefttext',
 					),
 					'data' => array(
@@ -577,7 +574,8 @@ class SFS
 						'value' => '<input type="checkbox" name="all" class="input_check" onclick="invertAll(this, this.form);" />',
 					),
 					'data' => array(
-						'function' => function($entry) {
+						'function' => function($entry)
+						{
 							return '<input type="checkbox" class="input_check" name="delete[]" value="' . $entry['id'] . '"' . ($entry['editable'] ? '' : ' disabled="disabled"') . ' />';
 						},
 						'style' => 'text-align: center;',
@@ -597,11 +595,11 @@ class SFS
 				array(
 					'position' => 'below_table_data',
 					'value' => '
-						' . $txt['sfs_log_search'] . ' (' . $context['search']['label'] . '):
-						<input type="text" name="search" size="18" value="' . $smcFunc['htmlspecialchars']($context['search']['string']) . '" class="input_text" /> <input type="submit" name="is_search" value="' . $txt['modlog_go'] . '" class="button_submit" />
+						' . $this->txt('sfs_log_search') . ' (' . $context['search']['label'] . '):
+						<input type="text" name="search" size="18" value="' . $smcFunc['htmlspecialchars']($context['search']['string']) . '" class="input_text" /> <input type="submit" name="is_search" value="' . $this->txt('modlog_go') . '" class="button_submit" />
 						' . ($context['can_delete'] ? ' |
-							<input type="submit" name="remove" value="' . $txt['modlog_remove'] . '" class="button_submit" />
-							<input type="submit" name="removeall" value="' . $txt['modlog_removeall'] . '" class="button_submit" />' : ''),
+							<input type="submit" name="remove" value="' . $this->txt('modlog_remove') . '" class="button_submit" />
+							<input type="submit" name="removeall" value="' . $this->txt('modlog_removeall') . '" class="button_submit" />' : ''),
 				),
 			),
 		);
@@ -635,7 +633,7 @@ class SFS
 	 */
 	public function getSFSLogEntries(int $start, int $items_per_page, string $sort, string $query_string = '', array $query_params = array()): array
 	{
-		global $context, $smcFunc, $txt;
+		global $context, $smcFunc;
 
 		// Fetch all of our logs.
 		$result = $smcFunc['db_query']('', '
@@ -671,11 +669,11 @@ class SFS
 		{
 			$entries[$row['id_sfs']] = array(
 				'id' => $row['id_sfs'],
-				'type' => $txt['sfs_log_types_' . $row['id_type']],
+				'type' => $this->txt('sfs_log_types_' . $row['id_type']),
 				'time' => timeformat($row['log_time']),
 				'url' => preg_replace('~http(s)?://~i', 'hxxp\\1://', $row['url']),
 				'timestamp' => forum_time(true, $row['log_time']),
-				'member_link' => $row['id_member'] ? '<a href="' . $scripturl . '?action=profile;u=' . $row['id_member'] . '">' . $row['real_name'] . '</a>' : (empty($row['real_name']) ? ($txt['guest'] . (!empty($row['extra']['member_acted']) ? ' (' . $row['extra']['member_acted'] . ')' : '')) : $row['real_name']),
+				'member_link' => $row['id_member'] ? '<a href="' . $scripturl . '?action=profile;u=' . $row['id_member'] . '">' . $row['real_name'] . '</a>' : (empty($row['real_name']) ? ($this->txt('guest') . (!empty($row['extra']['member_acted']) ? ' (' . $row['extra']['member_acted'] . ')' : '')) : $row['real_name']),
 				'username' => $row['username'],
 				'email' => $row['email'],
 				'ip' => '<a href="' . sprintf($this->urlSFSipCheck, $row['ip']) . '">' . $row['ip'] . '</a>',
@@ -708,13 +706,13 @@ class SFS
 			if (strpos($row['result'], ',') !== false)
 			{
 				list($resultType, $resultMatch, $extra) = explode(',', $row['result'] . ',,,');
-				$entries[$row['id_sfs']]['result'] = sprintf($txt['sfs_log_matched_on'], $resultType, $resultMatch);
+				$entries[$row['id_sfs']]['result'] = sprintf($this->txt('sfs_log_matched_on'), $resultType, $resultMatch);
 
 				// If this was a IP ban, note it.
 				if ($resultType == 'ip' && !empty($extra))
-					$entries[$row['id_sfs']]['result'] .= ' ' . $txt['sfs_log_auto_banned'];			
+					$entries[$row['id_sfs']]['result'] .= ' ' . $this->txt('sfs_log_auto_banned');			
 				if ($resultType == 'username' && !empty($extra))
-					$entries[$row['id_sfs']]['result'] .= ' ' . sprintf($txt['sfs_log_confidence'], $extra);			
+					$entries[$row['id_sfs']]['result'] .= ' ' . sprintf($this->txt('sfs_log_confidence'), $extra);			
 			}
 			else
 				$entries[$row['id_sfs']]['result'] = $row['result'];
@@ -860,9 +858,6 @@ class SFS
 		if ($regOptions['interface'] == 'admin')
 			return true;
 
-		// Get our language in here.
-		$this->loadLanguage();
-
 		// Pass everything and let us handle what options we pass on.  We pass the register_vars as these are what we have cleaned up.
 		return $this->sfsCheck(array(
 			array('username' => $regOptions['register_vars']['member_name']),
@@ -909,14 +904,11 @@ class SFS
 	 */
 	public function checkVerificationTest(array $thisVerification, array &$verification_errors): bool
 	{
-		global $user_info;
+		global $user_info, $modSettings;
 
 		// Registration is skipped as we process that differently.
 		if ($thisVerification['id'] == 'register')
 			return true;
-
-		// Get our language in here.
-		$this->loadLanguage();
 
 		// Get our options data.
 		$options = $this->getVerificationOptions();
@@ -939,7 +931,7 @@ class SFS
 				
 			}
 			// Members and they don't have enough posts?
-			elseif (empty($user_info['posts']) || $user_info['posts'] < $modSettings['sfs_verification_options_members_post_threshold'])
+			elseif (empty($user_info['posts']) || $user_info['posts'] < $modSettings['sfs_verfOptMemPostThreshold'])
 				return $this->sfsCheck(array(
 					array('username' => $user_info['username']),
 					array('email' => $user_info['email']),
@@ -961,7 +953,7 @@ class SFS
 			), 'post');
 		}
 		// We should avoid this on searches, as we can only send ips.
-		elseif ($thisVerification['id'] == 'search' && in_array('search', $options) && ($user_info['is_guest'] || empty($user_info['posts']) || $user_info['posts'] < $modSettings['sfs_verification_options_members_post_threshold']))
+		elseif ($thisVerification['id'] == 'search' && in_array('search', $options) && ($user_info['is_guest'] || empty($user_info['posts']) || $user_info['posts'] < $modSettings['sfs_verfOptMemPostThreshold']))
 		{
 			return $this->sfsCheck(array(
 				array('ip' => $user_info['ip']),
@@ -1020,11 +1012,218 @@ class SFS
 	 */
 	private function sfsCheck(array $checks, string $area = null): bool
 	{
-		global $sourcedir, $smcFunc, $context, $modSettings, $txt;
+		global $smcFunc, $context, $modSettings;
 
 		$requestURL = $this->buildServerURL();
 
 		// Lets build our data set, always send it as a bulk.
+		$singleCheckFound = $this->buildCheckPath($requestURL, $checks, $area);
+
+		// No checks found? Can't do this.
+		if (empty($singleCheckFound))
+		{
+			$this->logAllStats('error', $checks, 'error');
+			log_error($this->txt('sfs_request_failure_nodata') . ':' . $requestURL, 'critical');
+			return true;
+		}
+
+		// Send it off.
+		$resonse = $this->sendSFSCheck($requestURL);
+		$requestBlocked = '';
+
+		// Handle IPs only if we are supposed to, this is just a double check.
+		if (!empty($modSettings['sfs_ipcheck']) && !empty($response['ip']))
+			$requestBlocked = $this->sfsCheck_ips($response['ip']);
+
+		// If we didn't match a IP, handle Usernames only if we are supposed to, this is just a double check.
+		if (empty($requestBlocked) && !empty($modSettings['sfs_usernamecheck']) && !empty($response['username']))
+			$requestBlocked = $this->sfsCheck_username($response['username']);
+
+		// If we didn't match a IP or username, handle Emails only if we are supposed to, this is just a double check.
+		if (empty($requestBlocked) && !empty($modSettings['sfs_emailcheck']) && !empty($response['email']))
+			$requestBlocked = $this->sfsCheck_email($response['email']);
+
+		// Log all the stats?  Debug mode here.
+		if (!empty($modSettings['sfs_log_debug']))
+			$this->logAllStats('all', $checks, $requestBlocked);
+
+		// At this point, we have checked everything, do what needs to be done for our good person.
+		if (empty($requestBlocked))
+			return true;
+
+		// You are a bad spammer, don't tell them what was blocked.
+		fatal_error($this->txt('sfs_request_blocked'));
+	}
+
+	/**
+	 * Send off the request to SFS and receive a response back
+	 *
+	 * @param string $requestURL The requested URL to send to SFS
+	 * @in
+	 * @internal
+	 * @CalledIn SMF 2.0, SMF 2.1
+	 * @version 1.1
+	 * @since 1.1
+	 * @return array data we received back, could be a empty array.
+	*/
+	private function sendSFSCheck(string $requestURL): array
+	{
+		global $sourcedir;
+
+		// SMF 2.0 has the fetch_web_data in the Subs-Packages, 2.1 it is in Subs.php.
+		if ($this->versionCheck('2.0', 'smf'))
+			require_once($sourcedir . '/Subs-Package.php');
+		
+		// Now we have a URL, lets go get it.
+		$result = fetch_web_data($requestURL);
+		if ($result === false)
+		{
+			$this->logAllStats('error', $checks, 'failure');
+			log_error($this->txt('sfs_request_failure') . ':' . $requestURL, 'critical');
+			return true;
+		}
+
+		$response = $this->decodeJSON($result);
+
+		// No data received, log it and let them through.
+		if (empty($response))
+		{
+			$this->logAllStats('error', $checks, 'failure');
+			log_error($this->txt('sfs_request_failure') . ':' . $requestURL, 'critical');
+			return true;
+		}
+
+		return $response;
+	}
+
+	/**
+	 * Run checks for IPs
+	 *
+	 * @param array $ips All the IPs we are checking.
+	 * @internal
+	 * @CalledIn SMF 2.0, SMF 2.1
+	 * @version 1.1
+	 * @since 1.1
+	 * @return string Request Blocked data if any
+	*/
+	private function sfsCheck_ips(array $ips): string
+	{
+		global $modSettings, $smcFunc;
+
+		$requestBlocked = '';
+		foreach ($ips as $check)
+		{
+			// They appeared! Block this.
+			if (!empty($check['appears']))
+			{
+				// Ban them because they are black listed?
+				$autoBlackListResult = '0';
+				if (!empty($modSettings['sfs_ipcheck_autoban']) && !empty($check['frequency']) && $check['frequency'] == 255)
+					$autoBlackListResult = $this->BanNewIP($check['value']);
+
+				$this->logBlockedStats('ip', $check);
+				$requestBlocked = 'ip,' . $smcFunc['htmlspecialchars']($check['value']) . ',' . ($autoBlackListResult ? 1 : 0);
+				break;
+			}
+		}
+
+		return $requestBlocked;
+	}
+
+	/**
+	 * Run checks for Usernames
+	 *
+	 * @params array $usernames All the usernames we are checking.
+	 * @internal
+	 * @CalledIn SMF 2.0, SMF 2.1
+	 * @version 1.1
+	 * @since 1.1
+	 * @return string Request Blocked data if any
+	*/
+	private function sfsCheck_username(array $usernames): string
+	{
+		global $modSettings, $smcFunc;
+
+		$requestBlocked = '';
+		foreach ($usernames as $check)
+		{
+			// Combine with $area we could also require admin approval above thresholds on things like register.
+			if (!empty($check['appears']))
+			{
+				$shouldBlock = true;
+				$confidenceLevel = 0;
+
+				// They meet the confidence level, block them.
+				if (!empty($modSettings['sfs_username_confidence']) && !empty($check['confidence']) && $area == 'register' && (float) $modSettings['sfs_username_confidence'] <= (float) $check['confidence'])
+					$confidenceLevel = $check['confidence'];
+				// We are not confident that they should be blocked.
+				if (!empty($modSettings['sfs_username_confidence']) && !empty($check['confidence']) && $area == 'register' && (float) $modSettings['sfs_username_confidence'] > (float) $check['confidence'])
+				{
+					// Incase we need to debug this.
+					if (!empty($modSettings['sfs_log_debug']))
+						$this->logAllStats('all', $checks, 'username,' . $smcFunc['htmlspecialchars']($check['value']) . ',' . $check['confidence']);
+
+					$shouldBlock = false;
+				}
+
+				// Block them.
+				if ($shouldBlock)
+				{
+					$this->logBlockedStats('username', $check);
+					$requestBlocked = 'username,' . $smcFunc['htmlspecialchars']($check['value']) . ',' . $confidenceLevel;
+					break;
+				}
+			}
+		}
+
+		return $requestBlocked;
+	}
+
+	/**
+	 * Run checks for Email
+	 *
+	 * @params array $email All the email we are checking.
+	 * @internal
+	 * @CalledIn SMF 2.0, SMF 2.1
+	 * @version 1.1
+	 * @since 1.1
+	 * @return string Request Blocked data if any
+	*/
+	private function sfsCheck_email(array $email): string
+	{
+		global $modSettings, $smcFunc;
+
+		$requestBlocked = '';
+		foreach ($email as $check)
+		{
+			if (!empty($check['appears']))
+			{
+				$this->logBlockedStats('email', $check);
+				$requestBlocked = 'email,' . $smcFunc['htmlspecialchars']($check['value']);
+				break;
+			}
+		}
+
+		return $requestBlocked;
+	}
+
+	/**
+	 * Run checks against the SFS database.
+	 *
+	 * @param string $requestURL The initial url we will send.
+	 * @param array $checks All the possible checks we would like to preform.
+	 * @param string $area The area this is coming from.
+	 *
+	 * @internal
+	 * @CalledIn SMF 2.0, SMF 2.1
+	 * @version 1.0
+	 * @since 1.0
+	 * @return bool True we found something to check, false nothing..  $requestURL will be updated with the new data.
+	 */
+	private function buildCheckPath(string &$requestURL, array $checks, string $area = null): bool
+	{
+		global $context, $modSettings;
+
 		$singleCheckFound = false;
 		foreach ($checks as $chk)
 		{
@@ -1052,120 +1251,7 @@ class SFS
 			}
 		}
 
-		// No checks found? Can't do this.
-		if (empty($singleCheckFound))
-		{
-			$this->logAllStats('error', $checks, 'error');
-			log_error($txt['sfs_request_failure_nodata'] . ':' . $requestURL, 'critical');
-			return true;
-		}
-
-		// SMF 2.0 has the fetch_web_data in the Subs-Packages, 2.1 it is in Subs.php.
-		if ($this->versionCheck('2.0', 'smf'))
-			require_once($sourcedir . '/Subs-Package.php');
-		
-		// Now we have a URL, lets go get it.
-		$result = fetch_web_data($requestURL);
-		if ($result === false)
-		{
-			$this->logAllStats('error', $checks, 'failure');
-			log_error($txt['sfs_request_failure'] . ':' . $requestURL, 'critical');
-			return true;
-		}
-
-		$response = $this->decodeJSON($result);
-
-		// No data received, log it and let them through.
-		if (empty($response))
-		{
-			$this->logAllStats('error', $checks, 'failure');
-			log_error($txt['sfs_request_failure'] . ':' . $requestURL, 'critical');
-			return true;
-		}
-
-		$requestBlocked = '';
-
-		// Handle IPs only if we are supposed to, this is just a double check.
-		if (!empty($modSettings['sfs_ipcheck']) && !empty($response['ip']))
-		{
-			foreach ($response['ip'] as $check)
-			{
-				// They appeared! Block this.
-				if (!empty($check['appears']))
-				{
-					// Ban them because they are black listed?
-					$autoBlackListResult = '0';
-					if (!empty($modSettings['sfs_ipcheck_autoban']) && !empty($check['frequency']) && $check['frequency'] == 255)
-						$autoBlackListResult = $this->BanNewIP($check['value']);
-
-					$this->logBlockedStats('ip', $check);
-					$requestBlocked = 'ip,' . $smcFunc['htmlspecialchars']($check['value']) . ',' . ($autoBlackListResult ? 1 : 0);
-					break;
-				}
-			}
-		}
-
-		// If we didn't match a IP, handle Usernames only if we are supposed to, this is just a double check.
-		if (empty($requestBlocked) && !empty($modSettings['sfs_usernamecheck']) && !empty($response['username']))
-		{
-			foreach ($response['username'] as $check)
-			{
-				// Combine with $area we could also require admin approval above thresholds on things like register.
-				if (!empty($check['appears']))
-				{
-					$shouldBlock = true;
-					$confidenceLevel = 0;
-
-					// They meet the confidence level, block them.
-					if (!empty($modSettings['sfs_username_confidence']) && !empty($check['confidence']) && $area == 'register' && (float) $modSettings['sfs_username_confidence'] <= (float) $check['confidence'])
-						$confidenceLevel = $check['confidence'];
-					// We are not confident that they should be blocked.
-					if (!empty($modSettings['sfs_username_confidence']) && !empty($check['confidence']) && $area == 'register' && (float) $modSettings['sfs_username_confidence'] > (float) $check['confidence'])
-					{
-						// Incase we need to debug this.
-						if (!empty($modSettings['sfs_log_debug']))
-							$this->logAllStats('all', $checks, 'username,' . $smcFunc['htmlspecialchars']($check['value']) . ',' . $check['confidence']);
-
-						$shouldBlock = false;
-					}
-
-					// Block them.
-					if ($shouldBlock)
-					{
-						$this->logBlockedStats('username', $check);
-						$requestBlocked = 'username,' . $smcFunc['htmlspecialchars']($check['value']) . ',' . $confidenceLevel;
-						break;
-					}
-				}
-			}
-		}
-
-		// If we didn't match a IP or username, handle Emails only if we are supposed to, this is just a double check.
-		if (empty($requestBlocked) && !empty($modSettings['sfs_emailcheck']) && !empty($response['email']))
-		{
-			foreach ($response['email'] as $check)
-			{
-				if (!empty($check['appears']))
-				{
-					$this->logBlockedStats('email', $check);
-					$requestBlocked = 'email,' . $smcFunc['htmlspecialchars']($check['value']);
-					break;
-				}
-			}
-		}
-
-
-		// Log all the stats?  Debug mode here.
-		if (!empty($modSettings['sfs_log_debug']))
-			$this->logAllStats('all', $checks, $requestBlocked);
-
-		// At this point, we have checked everything, do what needs to be done for our good person.
-		if (empty($requestBlocked))
-			return true;
-
-		// You are a bad spammer, don't tell them what was blocked.
-		$this->loadLanguage();
-		fatal_error($txt['sfs_request_blocked']);
+		return $singleCheckFound;
 	}
 
 	/**
@@ -1382,23 +1468,21 @@ class SFS
 	 */
 	private function sfsServerMapping($returnType = null)
 	{
-		global $txt;
-
 		// Global list of servers.
 		$serverList = array(
 			0 => array(
 				'region' => 'global',
-				'label' => $txt['sfs_region_global'],
+				'label' => $this->txt('sfs_region_global'),
 				'host' => 'api.stopforumspam.org',
 			),
 			1 => array(
 				'region' => 'us',
-				'label' => $txt['sfs_region_us'],
+				'label' => $this->txt('sfs_region_us'),
 				'host' => 'us.stopforumspam.org',
 			),
 			2 => array(
 				'region' => 'eu',
-				'label' => $txt['sfs_region_eu'],
+				'label' => $this->txt('sfs_region_eu'),
 				'host' => 'eruope.stopforumspam.org',
 			),
 		);
@@ -1428,8 +1512,8 @@ class SFS
 	{
 		global $user_info, $modSettings;
 
-		$optionsKey = $user_info['is_guest'] ? 'sfs_verification_options' : 'sfs_verification_options_members';
-		$optionsKeyExtra = $user_info['is_guest'] ? 'sfs_verification_options_extra' : 'sfs_verification_options_membersextra';
+		$optionsKey = $user_info['is_guest'] ? 'sfs_verification_options' : 'sfs_verOptionsMembers';
+		$optionsKeyExtra = $user_info['is_guest'] ? 'sfs_verification_options_extra' : 'sfs_verOptionsMemExtra';
 
 		// Standard options.
 		if ($this->versionCheck('2.0', 'smf') && !empty($modSettings[$optionsKey]))
@@ -1444,10 +1528,8 @@ class SFS
 		{
 			$this->extraVerificationOptions = explode(',', $modSettings[$optionsKeyExtra]);
 
-			if (is_array($options))
+			if (is_array($options) && !empty($this->extraVerificationOptions))
 				$options = array_merge($options, $this->extraVerificationOptions);
-			else
-				$options = $this->extraVerificationOptions;
 		}
 
 		return $options;
@@ -1476,7 +1558,7 @@ class SFS
 			'sfs_emailcheck' => 1,
 			'sfs_username_confidence' => 50.01,
 			'sfs_region' => 0,
-			'sfs_verification_options_members_post_threshold' => 5,
+			'sfs_verfOptMemPostThreshold' => 5
 		);
 
 		// SMF 2.0 is serialized, SMF 2.1 is json.
@@ -1563,6 +1645,30 @@ class SFS
 	}
 
 	/**
+	 * A global function for loading $txt strings.
+	 *
+	 * @param $key The Text Key
+	 * @internal
+	 * @CalledIn SMF 2.0, SMF 2.1
+	 * @version 1.1
+	 * @since 1.1
+	 * @return string The text string.
+	 */
+	public function txt($key): string
+	{
+		global $txt;
+
+		// Load the language if its not here already.
+		if (!isset($txt[$key]))
+			$this->loadLanguage();
+
+		if (!isset($txt[$key]))
+			return '';
+
+		return $txt[$key];
+	}
+
+	/**
 	 * Handle searching for logs.
 	 *
 	 * @internal
@@ -1584,12 +1690,12 @@ class SFS
 
 		// What we can search.
 		$searchTypes = array(
-			'url' => array('sql' => 'l.url', 'label' => $txt['sfs_log_search_url']),
-			'member' => array('sql' => 'mem.real_name', 'label' => $txt['sfs_log_search_member']),
-			'username' => array('sql' => 'l.username', 'label' => $txt['sfs_log_search_username']),
-			'email' => array('sql' => 'l.email', 'label' => $txt['sfs_log_search_email']),
-			'ip' => array('sql' => 'lm.ip', 'label' => $txt['sfs_log_search_ip']),
-			'ip2' => array('sql' => 'lm.ip2', 'label' => $txt['sfs_log_search_ip2'])
+			'url' => array('sql' => 'l.url', 'label' => $this->txt('sfs_log_search_url')),
+			'member' => array('sql' => 'mem.real_name', 'label' => $this->txt('sfs_log_search_member')),
+			'username' => array('sql' => 'l.username', 'label' => $this->txt('sfs_log_search_username')),
+			'email' => array('sql' => 'l.email', 'label' => $this->txt('sfs_log_search_email')),
+			'ip' => array('sql' => 'lm.ip', 'label' => $this->txt('sfs_log_search_ip')),
+			'ip2' => array('sql' => 'lm.ip2', 'label' => $this->txt('sfs_log_search_ip2'))
 		);
 
 		// What we want to search for.
@@ -1643,7 +1749,7 @@ class SFS
 			WHERE name = {string:new_ban_name}
 			LIMIT 1',
 			array(
-				'new_ban_name' => substr($txt['sfs_ban_group_name'], 0, 20),
+				'new_ban_name' => substr($this->txt('sfs_ban_group_name'), 0, 20),
 			)
 		);
 		if ($smcFunc['db_num_rows']($request) == 1)
@@ -1663,7 +1769,7 @@ class SFS
 
 		// Ban Information, this follows the format from the function.
 		$ban_info = array(
-			'name' => substr($txt['sfs_ban_group_name'], 0, 20),
+			'name' => substr($this->txt('sfs_ban_group_name'), 0, 20),
 			'cannot' => array(
 				'access' => 1,
 				'register' => 1,
@@ -1671,8 +1777,8 @@ class SFS
 				'login' => 1,
 			),
 			'db_expiration' => 'NULL',
-			'reason' => $txt['sfs_ban_group_reason'],
-			'notes' => $txt['sfs_ban_group_notes']
+			'reason' => $this->txt('sfs_ban_group_reason'),
+			'notes' => $this->txt('sfs_ban_group_notes')
 		);
 
 		// If we can shortcut this..

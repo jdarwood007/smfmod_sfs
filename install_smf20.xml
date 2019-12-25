@@ -17,7 +17,7 @@
 	if ($do_test)
 	{
 		// Check against SFS
-		if (is_callable($smcFunc['classSFS'], 'checkRegisterPost'))
+		if (!empty($smcFunc['classSFS']) && is_callable(array($smcFunc['classSFS'], 'checkVerificationTest')))
 			$smcFunc['classSFS']->checkVerificationTest($thisVerification, $verification_errors);
 
 		// This cannot happen!
