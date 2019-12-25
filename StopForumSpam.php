@@ -16,7 +16,6 @@ class SFS
 	private $urlSFSipCheck = 'https://www.stopforumspam.com/ipcheck/%1$s';
 	private $urlSFSsearch = 'https://www.stopforumspam.com/search/%1$s';
 
-
 	/**
 	 * @var string Name of the software and its version.  This is so we can branch out from the same base.
 	 */
@@ -27,6 +26,7 @@ class SFS
 	 * @var string The URL for the admin page.
 	 */
 	private $adminPageURL = null;
+	private $adminLogURL = null;
 
 	/**
 	 * @var array Our settings information used on saving/changing settings.
@@ -39,6 +39,8 @@ class SFS
 	 */
 	private $search_params = array();
 	private $search_params_column = '';
+	private $search_params_string = null;
+	private $search_params_type = null;
 
 	/**
 	 * @var int How long we disable removing logs.
@@ -575,9 +577,9 @@ class SFS
 						'value' => '<input type="checkbox" name="all" class="input_check" onclick="invertAll(this, this.form);" />',
 					),
 					'data' => array(
-						'function' => create_function('$entry', '
-							return \'<input type="checkbox" class="input_check" name="delete[]" value="\' . $entry[\'id\'] . \'"\' . ($entry[\'editable\'] ? \'\' : \' disabled="disabled"\') . \' />\';
-						'),
+						'function' => function($entry) {
+							return '<input type="checkbox" class="input_check" name="delete[]" value="' . $entry['id'] . '"' . ($entry['editable'] ? '' : ' disabled="disabled"') . ' />';
+						},
 						'style' => 'text-align: center;',
 					),
 				),
@@ -664,6 +666,7 @@ class SFS
 			))
 		);
 
+		$entries = array();
 		while ($row = $smcFunc['db_fetch_assoc']($result))
 		{
 			$entries[$row['id_sfs']] = array(
@@ -696,7 +699,7 @@ class SFS
 			{
 				$entries[$row['id_sfs']]['checks'] = '';
 
-				foreach ($checksDecoded as $key => $vkey)
+				foreach ($checksDecoded as $ckey => $vkey)
 					foreach ($vkey as $key => $value)
 						$entries[$row['id_sfs']]['checks'] .= ucfirst($key) . ':' . $value . '<br>';					
 			}
@@ -1062,7 +1065,15 @@ class SFS
 			require_once($sourcedir . '/Subs-Package.php');
 		
 		// Now we have a URL, lets go get it.
-		$response = $this->decodeJSON(fetch_web_data($requestURL));
+		$result = fetch_web_data($requestURL);
+		if ($result === false)
+		{
+			$this->logAllStats('error', $checks, 'failure');
+			log_error($txt['sfs_request_failure'] . ':' . $requestURL, 'critical');
+			return true;
+		}
+
+		$response = $this->decodeJSON($result);
 
 		// No data received, log it and let them through.
 		if (empty($response))
@@ -1072,7 +1083,7 @@ class SFS
 			return true;
 		}
 
-		$requestBlocked = false;
+		$requestBlocked = '';
 
 		// Handle IPs only if we are supposed to, this is just a double check.
 		if (!empty($modSettings['sfs_ipcheck']) && !empty($response['ip']))
@@ -1286,7 +1297,7 @@ class SFS
 
 		// Do we have $smcFunc?  It handles errors and logs them as needed.
 		if (isset($smcFunc['json_decode']) && is_callable($smcFunc['json_decode']))
-			return $smcFunc['json_decode']($request, true);
+			return $smcFunc['json_decode']($requestData, true);
 		// Back to the basics.
 		else
 		{
@@ -1432,7 +1443,11 @@ class SFS
 		if (!empty($modSettings[$optionsKeyExtra]))
 		{
 			$this->extraVerificationOptions = explode(',', $modSettings[$optionsKeyExtra]);
-			$options = array_merge($options, $this->extraVerificationOptions);
+
+			if (is_array($options))
+				$options = array_merge($options, $this->extraVerificationOptions);
+			else
+				$options = $this->extraVerificationOptions;
 		}
 
 		return $options;
@@ -1485,6 +1500,8 @@ class SFS
 				$this->changedSettings[$key] = null;
 				$modSettings[$key] = $value;
 			}
+
+		return true;
 	}
 
 	/**
@@ -1562,7 +1579,7 @@ class SFS
 		if (!empty($_REQUEST['params']) && empty($_REQUEST['is_search']))
 		{
 			$this->search_params = base64_decode(strtr($_REQUEST['params'], array(' ' => '+')));
-			$this->search_params = $this->JSONDecode($this->search_params);
+			$this->search_params = $this->decodeJSON($this->search_params);
 		}
 
 		// What we can search.
@@ -1631,7 +1648,7 @@ class SFS
 		);
 		if ($smcFunc['db_num_rows']($request) == 1)
 		{
-			$ban_data = $smcFunc['db_fetch_assoc']($result);
+			$ban_data = $smcFunc['db_fetch_assoc']($request);
 			$smcFunc['db_free_result']($request);
 
 			if (!empty($ban_data['id_ban_group']))
@@ -1792,7 +1809,7 @@ class SFS
 				return false;
 			}
 
-			$ban_triggers[] = array(
+			$ban_triggers = array(array(
 				$modSettings['sfs_ipcheck_autoban_group'],
 				$ip_parts[0]['low'],
 				$ip_parts[0]['high'],
@@ -1805,7 +1822,7 @@ class SFS
 				'',
 				'',
 				0,
-			);
+			));
 
 			$smcFunc['db_insert']('',
 				'{db_prefix}ban_items',

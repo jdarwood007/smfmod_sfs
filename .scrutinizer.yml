@@ -1,6 +1,3 @@
-filter:
-    excluded_paths:
-        - '*.min.js'
 checks:
     php:
         variable_existence: true
@@ -189,3 +186,5 @@ build:
 filter:
     dependency_paths:
         - smf/
+    excluded_paths:
+        - '*.min.js'
