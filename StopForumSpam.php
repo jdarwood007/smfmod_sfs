@@ -311,7 +311,7 @@ class SFS
 	 * In some software/versions, we can hook into the logs section.
 	 * In others we hook into the modifications settings.
 	 *
-	 * @param bool $return_config If true, returns empty array to prevent breaking old SMF installs.
+	 * @param array $log_functions All possible log functions.
 	 *
 	 * @api
 	 * @CalledIn SMF 2.1
@@ -321,17 +321,37 @@ class SFS
 	 * @uses integrate_manage_logs - Hook SMF2.1
 	 * @return void No return is generated
 	 */
-	public static function hook_manage_logs(array &$log_functions):void
+	public static function hook_manage_logs(array &$log_functions): bool
 	{
 		global $smcFunc;
 
 		// Add our logs sub action.
 		$log_functions['sfslog'] = array('StopForumSpam.php', 'startupLogs');
 
-		// Add it to the menu as well.
+		global $smcFunc;
+		return $smcFunc['classSFS']->AddToLogMenu($log_functions);
+	}
+
+	/**
+	 * Add the SFS logs to the log menu.
+	 *
+	 * @param array $log_functions All possible log functions.
+	 *
+	 * @CalledIn SMF 2.1
+	 * @See SFS::startupLogs
+	 * @version 1.1
+	 * @since 1.1
+	 * @return void No return is generated
+	 */
+	public function AddToLogMenu(array &$log_functions): bool
+	{
+		global $context;
+
 		$context[$context['admin_menu_name']]['tab_data']['tabs']['sfslog'] = array(
 			'description' => $this->txt('sfs_admin_logs'),
 		);
+
+		return true;
 	}
 
 	/**
@@ -434,153 +454,17 @@ class SFS
 			),
 			// This assumes we are viewing by user.
 			'columns' => array(
-				'type' => array(
-					'header' => array(
-						'value' => $this->txt('sfs_log_header_type'),
-						'class' => 'lefttext',
-					),
-					'data' => array(
-						'db' => 'type',
-						'class' => 'smalltext',
-					),
-					'sort' => array(
-					),
-				),
-				'time' => array(
-					'header' => array(
-						'value' => $this->txt('sfs_log_header_time'),
-						'class' => 'lefttext',
-					),
-					'data' => array(
-						'db' => 'time',
-						'class' => 'smalltext',
-					),
-					'sort' => array(
-						'default' => 'l.log_time DESC',
-						'reverse' => 'l.log_time',
-					),
-				),
-				'url' => array(
-					'header' => array(
-						'value' => $this->txt('sfs_log_header_url'),
-						'class' => 'lefttext',
-					),
-					'data' => array(
-						'db' => 'url',
-						'class' => 'smalltext',
-						'style' => 'word-break: break-word;',
-					),
-					'sort' => array(
-						'default' => 'l.url DESC',
-						'reverse' => 'l.url',
-					),
-				),
-				'member' => array(
-					'header' => array(
-						'value' => $this->txt('sfs_log_header_member'),
-						'class' => 'lefttext',
-					),
-					'data' => array(
-						'db' => 'member_link',
-						'class' => 'smalltext',
-					),
-					'sort' => array(
-						'default' => 'mem.id_member',
-						'reverse' => 'mem.id_member DESC',
-					),
-				),
-				'username' => array(
-					'header' => array(
-						'value' => $this->txt('sfs_log_header_username'),
-						'class' => 'lefttext',
-					),
-					'data' => array(
-						'db' => 'username',
-						'class' => 'smalltext',
-					),
-					'sort' => array(
-						'default' => 'l.username',
-						'reverse' => 'l.username DESC',
-					),
-				),
-				'email' => array(
-					'header' => array(
-						'value' => $this->txt('sfs_log_header_email'),
-						'class' => 'lefttext',
-					),
-					'data' => array(
-						'db' => 'email',
-						'class' => 'smalltext',
-					),
-					'sort' => array(
-						'default' => 'l.email',
-						'reverse' => 'l.email DESC',
-					),
-				),
-				'ip' => array(
-					'header' => array(
-						'value' => $this->txt('sfs_log_header_ip'),
-						'class' => 'lefttext',
-					),
-					'data' => array(
-						'db' => 'ip',
-						'class' => 'smalltext',
-					),
-					'sort' => array(
-						'default' => 'l.ip',
-						'reverse' => 'l.ip DESC',
-					),
-				),
-				'ip2' => array(
-					'header' => array(
-						'value' => $this->txt('sfs_log_header_ip2'),
-						'class' => 'lefttext',
-					),
-					'data' => array(
-						'db' => 'ip2',
-						'class' => 'smalltext',
-					),
-					'sort' => array(
-						'default' => 'l.ip2',
-						'reverse' => 'l.ip2 DESC',
-					),
-				),
-				'checks' => array(
-					'header' => array(
-						'value' => $this->txt('sfs_log_checks'),
-						'class' => 'lefttext',
-					),
-					'data' => array(
-						'db' => 'checks',
-						'class' => 'smalltext',
-						'style' => 'word-break: break-word;',
-					),
-					'sort' => array(),
-				),
-				'result' => array(
-					'header' => array(
-						'value' => $this->txt('sfs_log_result'),
-						'class' => 'lefttext',
-					),
-					'data' => array(
-						'db' => 'result',
-						'class' => 'smalltext',
-						'style' => 'word-break: break-word;',
-					),
-					'sort' => array(),
-				),
-				'delete' => array(
-					'header' => array(
-						'value' => '<input type="checkbox" name="all" class="input_check" onclick="invertAll(this, this.form);" />',
-					),
-					'data' => array(
-						'function' => function($entry)
-						{
-							return '<input type="checkbox" class="input_check" name="delete[]" value="' . $entry['id'] . '"' . ($entry['editable'] ? '' : ' disabled="disabled"') . ' />';
-						},
-						'style' => 'text-align: center;',
-					),
-				),
+				'type' => $this->loadLogsColumnType(),
+				'time' => $this->loadLogsColumnTime(),
+				'url' => $this->loadLogsColumnURL(),
+				'member' => $this->loadLogsColumnMember(),
+				'username' => $this->loadLogsColumnUsername(),
+				'email' => $this->loadLogsColumnEmail(),
+				'ip' => $this->loadLogsColumnIP(),
+				'ip2' => $this->loadLogsColumnIP(true),
+				'checks' => $this->loadLogsColumnChecks(),
+				'result' => $this->loadLogsColumnResult(),
+				'delete' => $this->loadLogsColumnDelete(),
 			),
 			'form' => array(
 				'href' => $context['url_start'],
@@ -614,6 +498,270 @@ class SFS
 	}
 
 	/**
+	 * loadLogs - Column - Type.
+	 *
+	 * @internal
+	 * @CalledIn SMF2.0, SMF 2.1
+	 * @version 1.1
+	 * @since 1.1
+	 * @return array The options for the column
+	 */
+	function loadLogsColumnType(): array
+	{
+		return array(
+			'header' => array(
+				'value' => $this->txt('sfs_log_header_type'),
+				'class' => 'lefttext',
+			),
+			'data' => array(
+				'db' => 'type',
+				'class' => 'smalltext',
+			),
+			'sort' => array(
+			),
+		);
+	}
+
+	/**
+	 * loadLogs - Column - Time.
+	 *
+	 * @internal
+	 * @CalledIn SMF2.0, SMF 2.1
+	 * @version 1.1
+	 * @since 1.1
+	 * @return array The options for the column
+	 */
+	function loadLogsColumnTime(): array
+	{
+		return array(
+			'header' => array(
+				'value' => $this->txt('sfs_log_header_time'),
+				'class' => 'lefttext',
+			),
+			'data' => array(
+				'db' => 'time',
+				'class' => 'smalltext',
+			),
+			'sort' => array(
+				'default' => 'l.log_time DESC',
+				'reverse' => 'l.log_time',
+			),
+		);
+	}
+
+	/**
+	 * loadLogs - Column - URL.
+	 *
+	 * @internal
+	 * @CalledIn SMF2.0, SMF 2.1
+	 * @version 1.1
+	 * @since 1.1
+	 * @return array The options for the column
+	 */
+	function loadLogsColumnURL(): array
+	{
+		return array(
+			'header' => array(
+				'value' => $this->txt('sfs_log_header_url'),
+				'class' => 'lefttext',
+			),
+			'data' => array(
+				'db' => 'url',
+				'class' => 'smalltext',
+				'style' => 'word-break: break-word;',
+			),
+			'sort' => array(
+				'default' => 'l.url DESC',
+				'reverse' => 'l.url',
+			),
+		);
+	}
+
+	/**
+	 * loadLogs - Column - Member.
+	 *
+	 * @internal
+	 * @CalledIn SMF2.0, SMF 2.1
+	 * @version 1.1
+	 * @since 1.1
+	 * @return array The options for the column
+	 */
+	function loadLogsColumnMember(): array
+	{
+		return array(
+			'header' => array(
+				'value' => $this->txt('sfs_log_header_member'),
+				'class' => 'lefttext',
+			),
+			'data' => array(
+				'db' => 'member_link',
+				'class' => 'smalltext',
+			),
+			'sort' => array(
+				'default' => 'mem.id_member',
+				'reverse' => 'mem.id_member DESC',
+			),
+		);
+	}
+
+	/**
+	 * loadLogs - Column - Username.
+	 *
+	 * @internal
+	 * @CalledIn SMF2.0, SMF 2.1
+	 * @version 1.1
+	 * @since 1.1
+	 * @return array The options for the column
+	 */
+	function loadLogsColumnUsername(): array
+	{
+		return array(
+			'header' => array(
+				'value' => $this->txt('sfs_log_header_username'),
+				'class' => 'lefttext',
+			),
+			'data' => array(
+				'db' => 'username',
+				'class' => 'smalltext',
+			),
+			'sort' => array(
+				'default' => 'l.username',
+				'reverse' => 'l.username DESC',
+			),
+		);
+	}
+
+	/**
+	 * loadLogs - Column - Email.
+	 *
+	 * @internal
+	 * @CalledIn SMF2.0, SMF 2.1
+	 * @version 1.1
+	 * @since 1.1
+	 * @return array The options for the column
+	 */
+	function loadLogsColumnEmail(): array
+	{
+		return array(
+			'header' => array(
+				'value' => $this->txt('sfs_log_header_email'),
+				'class' => 'lefttext',
+			),
+			'data' => array(
+				'db' => 'email',
+				'class' => 'smalltext',
+			),
+			'sort' => array(
+				'default' => 'l.email',
+				'reverse' => 'l.email DESC',
+			),
+		);
+	}
+
+	/**
+	 * loadLogs - Column - IP.
+	 *
+	 * @param string $ip2 If true, use ip2
+	 * @internal
+	 * @CalledIn SMF2.0, SMF 2.1
+	 * @version 1.1
+	 * @since 1.1
+	 * @return array The options for the column
+	 */
+	function loadLogsColumnIP(bool $ip2 = false): array
+	{
+		return array(
+			'header' => array(
+				'value' => $this->txt('sfs_log_header_ip' . ($ip2 ? '2' : '')),
+				'class' => 'lefttext',
+			),
+			'data' => array(
+				'db' => 'ip' . ($ip2 ? '2' : ''),
+				'class' => 'smalltext',
+			),
+			'sort' => array(
+				'default' => 'l.ip' . ($ip2 ? '2' : ''),
+				'reverse' => 'l.ip' . ($ip2 ? '2' : '') . ' DESC',
+			),
+		);
+	}
+
+	/**
+	 * loadLogs - Column - Checks.
+	 *
+	 * @internal
+	 * @CalledIn SMF2.0, SMF 2.1
+	 * @version 1.1
+	 * @since 1.1
+	 * @return array The options for the column
+	 */
+	function loadLogsColumnChecks(): array
+	{
+		return array(
+			'header' => array(
+				'value' => $this->txt('sfs_log_checks'),
+				'class' => 'lefttext',
+			),
+			'data' => array(
+				'db' => 'checks',
+				'class' => 'smalltext',
+				'style' => 'word-break: break-word;',
+			),
+			'sort' => array(),
+		);
+	}
+
+	/**
+	 * loadLogs - Column - Result.
+	 *
+	 * @internal
+	 * @CalledIn SMF2.0, SMF 2.1
+	 * @version 1.1
+	 * @since 1.1
+	 * @return array The options for the column
+	 */
+	function loadLogsColumnResult(): array
+	{
+		return array(
+			'header' => array(
+				'value' => $this->txt('sfs_log_result'),
+				'class' => 'lefttext',
+			),
+			'data' => array(
+				'db' => 'result',
+				'class' => 'smalltext',
+				'style' => 'word-break: break-word;',
+			),
+			'sort' => array(),
+		);
+	}
+
+	/**
+	 * loadLogs - Column - Delete.
+	 *
+	 * @internal
+	 * @CalledIn SMF2.0, SMF 2.1
+	 * @version 1.1
+	 * @since 1.1
+	 * @return array The options for the column
+	 */
+	function loadLogsColumnDelete(): array
+	{
+		return array(
+			'header' => array(
+				'value' => '<input type="checkbox" name="all" class="input_check" onclick="invertAll(this, this.form);" />',
+			),
+			'data' => array(
+				'function' => function($entry)
+				{
+					return '<input type="checkbox" class="input_check" name="delete[]" value="' . $entry['id'] . '"' . ($entry['editable'] ? '' : ' disabled="disabled"') . ' />';
+				},
+				'style' => 'text-align: center;',
+			),
+		);
+	}
+
+	/**
 	 * Get the log data and returns it ready to go for GenericList handling.
 	 *
 	 * @param int $start The index for where we offset or start at for the list
@@ -633,7 +781,7 @@ class SFS
 	 */
 	public function getSFSLogEntries(int $start, int $items_per_page, string $sort, string $query_string = '', array $query_params = array()): array
 	{
-		global $context, $smcFunc;
+		global $scripturl, $context, $smcFunc;
 
 		// Fetch all of our logs.
 		$result = $smcFunc['db_query']('', '
@@ -1028,7 +1176,7 @@ class SFS
 		}
 
 		// Send it off.
-		$resonse = $this->sendSFSCheck($requestURL);
+		$response = $this->sendSFSCheck($requestURL, $checks, $area);
 		$requestBlocked = '';
 
 		// Handle IPs only if we are supposed to, this is just a double check.
@@ -1058,15 +1206,17 @@ class SFS
 	/**
 	 * Send off the request to SFS and receive a response back
 	 *
-	 * @param string $requestURL The requested URL to send to SFS
-	 * @in
+	 * @param string $requestURL The initial url we will send.
+	 * @param array $checks All the possible checks we would like to preform.
+	 * @param string $area The area this is coming from.
+	 *
 	 * @internal
 	 * @CalledIn SMF 2.0, SMF 2.1
 	 * @version 1.1
 	 * @since 1.1
 	 * @return array data we received back, could be a empty array.
-	*/
-	private function sendSFSCheck(string $requestURL): array
+	 */
+	private function sendSFSCheck(string $requestURL, array $checks, string $area = null): array
 	{
 		global $sourcedir;
 
@@ -1105,7 +1255,7 @@ class SFS
 	 * @version 1.1
 	 * @since 1.1
 	 * @return string Request Blocked data if any
-	*/
+	 */
 	private function sfsCheck_ips(array $ips): string
 	{
 		global $modSettings, $smcFunc;
@@ -1139,7 +1289,7 @@ class SFS
 	 * @version 1.1
 	 * @since 1.1
 	 * @return string Request Blocked data if any
-	*/
+	 */
 	private function sfsCheck_username(array $usernames): string
 	{
 		global $modSettings, $smcFunc;
@@ -1188,7 +1338,7 @@ class SFS
 	 * @version 1.1
 	 * @since 1.1
 	 * @return string Request Blocked data if any
-	*/
+	 */
 	private function sfsCheck_email(array $email): string
 	{
 		global $modSettings, $smcFunc;
@@ -1647,7 +1797,7 @@ class SFS
 	/**
 	 * A global function for loading $txt strings.
 	 *
-	 * @param $key The Text Key
+	 * @param string $key The key of the text string we want to load.
 	 * @internal
 	 * @CalledIn SMF 2.0, SMF 2.1
 	 * @version 1.1
