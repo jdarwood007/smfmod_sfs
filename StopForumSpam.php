@@ -37,6 +37,7 @@ class SFS
 	/**
 	 * @var mixed Search area handling.
 	 */
+	private $search_types = array();
 	private $search_params = array();
 	private $search_params_column = '';
 	private $search_params_string = null;
@@ -461,7 +462,7 @@ class SFS
 				'include_start' => true,
 				'hidden_fields' => array(
 					$context['session_var'] => $context['session_id'],
-					'params' => $context['search_params']
+					'params' => $this->search_params
 				),
 			),
 			'additional_rows' => array(
@@ -509,8 +510,8 @@ class SFS
 		return array(
 			'function' => array($this, 'getSFSLogEntries'),
 			'params' => array(
-				(!empty($this->search_params['string']) ? ' INSTR({raw:sql_type}, {string:search_string})' : ''),
-				array('sql_type' => $this->search_params_column, 'search_string' => $this->search_params['string']),
+				(!empty($this->logSearch['string']) ? ' INSTR({raw:sql_type}, {string:search_string})' : ''),
+				array('sql_type' => $this->search_params_column, 'search_string' => $this->logSearch['string']),
 			),
 		);
 	}
@@ -529,8 +530,8 @@ class SFS
 		return array(
 			'function' => array($this, 'getSFSLogEntriesCount'),
 			'params' => array(
-				(!empty($this->search_params['string']) ? ' INSTR({raw:sql_type}, {string:search_string})' : ''),
-				array('sql_type' => $this->search_params_column, 'search_string' => $this->search_params['string']),
+				(!empty($this->logSearch['string']) ? ' INSTR({raw:sql_type}, {string:search_string})' : ''),
+				array('sql_type' => $this->search_params_column, 'search_string' => $this->logSearch['string']),
 			),
 		);
 	}
@@ -1188,6 +1189,8 @@ class SFS
 	 */
 	private function checkVerificationTestReport(): bool
 	{
+		global $user_info;
+
 		$email = !isset($_POST['email']) ? '' : trim($_POST['email']);
 
 		return $this->sfsCheck(array(
@@ -1208,6 +1211,8 @@ class SFS
 	 */
 	private function checkVerificationTestSearch(): bool
 	{
+		global $user_info;
+
 		return $this->sfsCheck(array(
 			array('ip' => $user_info['ip']),
 			array('ip' => $user_info['ip2']),
@@ -1225,6 +1230,8 @@ class SFS
 	 */
 	private function checkVerificationTestExtra(array $thisVerification): bool
 	{
+		global $user_info;
+
 		foreach ($this->extraVerificationOptions as $option)
 		{
 			// Not a match.
@@ -1365,13 +1372,14 @@ class SFS
 	 * Run checks for IPs
 	 *
 	 * @param array $ips All the IPs we are checking.
+	 * @param string $area If defined the area we are checking.
 	 * @internal
 	 * @CalledIn SMF 2.0, SMF 2.1
 	 * @version 1.1
 	 * @since 1.1
 	 * @return string Request Blocked data if any
 	 */
-	private function sfsCheck_ips(array $ips): string
+	private function sfsCheck_ips(array $ips, string $area = ''): string
 	{
 		global $modSettings, $smcFunc;
 
@@ -1398,14 +1406,15 @@ class SFS
 	/**
 	 * Run checks for Usernames
 	 *
-	 * @params array $usernames All the usernames we are checking.
+	 * @param array $usernames All the usernames we are checking.
+	 * @param string $area If defined the area we are checking.
 	 * @internal
 	 * @CalledIn SMF 2.0, SMF 2.1
 	 * @version 1.1
 	 * @since 1.1
 	 * @return string Request Blocked data if any
 	 */
-	private function sfsCheck_username(array $usernames): string
+	private function sfsCheck_username(array $usernames, string $area = ''): string
 	{
 		global $modSettings, $smcFunc;
 
@@ -1426,7 +1435,7 @@ class SFS
 				{
 					// Incase we need to debug this.
 					if (!empty($modSettings['sfs_log_debug']))
-						$this->logAllStats('all', $checks, 'username,' . $smcFunc['htmlspecialchars']($check['value']) . ',' . $check['confidence']);
+						$this->logAllStats('all', $check, 'username,' . $smcFunc['htmlspecialchars']($check['value']) . ',' . $check['confidence']);
 
 					$shouldBlock = false;
 				}
@@ -1447,14 +1456,15 @@ class SFS
 	/**
 	 * Run checks for Email
 	 *
-	 * @params array $email All the email we are checking.
+	 * @param array $email All the email we are checking.
+	 * @param string $area If defined the area we are checking.
 	 * @internal
 	 * @CalledIn SMF 2.0, SMF 2.1
 	 * @version 1.1
 	 * @since 1.1
 	 * @return string Request Blocked data if any
 	 */
-	private function sfsCheck_email(array $email): string
+	private function sfsCheck_email(array $email, string $area = ''): string
 	{
 		global $modSettings, $smcFunc;
 
@@ -1943,19 +1953,71 @@ class SFS
 	 * @since 1.0
 	 * @return void No return is generated here.
 	 */
-	private function handleLogSearch(string &$string): void
+	private function handleLogSearch(string &$url): void
 	{
 		global $context, $txt;
 
 		// If we have some data from a search, lets bring it back out.
-		if (!empty($_REQUEST['params']) && empty($_REQUEST['is_search']))
-		{
-			$this->search_params = base64_decode(strtr($_REQUEST['params'], array(' ' => '+')));
-			$this->search_params = $this->decodeJSON($this->search_params);
-		}
+		$this->search_params = $this->handleLogSearchParams();
 
 		// What we can search.
-		$searchTypes = array(
+		$this->search_types = $this->handleLogSearchTypes();
+		$this->search_params_string = $this->handleLogSearchParamsString();
+		$this->search_params_type = $this->handleLogSearchParamsType();
+
+		$this->search_params_column = $this->search_types[$this->search_params_type]['sql'];
+
+		// Setup the search context.
+		$this->search_params = empty($search_params_string) ? '' : base64_encode(json_encode(array(
+			'string' => $this->search_params_string,
+			'type' => $this->search_params_type,
+		)));
+		$this->logSearch = array(
+			'string' => $this->search_params_string,
+			'type' => $this->search_params_type,
+			'label' => $this->search_types[$this->search_params_type]['label'],
+		);
+
+		if (!empty($this->search_params))
+			$url .= ';params=' . $this->search_params;
+	}
+
+	/**
+	 * Handle Search Params
+	 *
+	 * @internal
+	 * @CalledIn SMF 2.0, SMF 2.1
+	 * @version 1.1
+	 * @since 1.0
+	 * @return bool True upon success, false otherwise.
+	 */
+	private function handleLogSearchParams(): array
+	{
+		// If we have something to search for saved, get it back out.
+		if (!empty($_REQUEST['params']) && empty($_REQUEST['is_search']))
+		{
+			$search_params = base64_decode(strtr($params, array(' ' => '+')));
+			$search_params = $this->decodeJSON($this->search_params);
+
+			if (!empty($search_params))
+				return $search_params;
+		}
+	
+		return array();
+	}
+
+	/**
+	 * Handle Search Types
+	 *
+	 * @internal
+	 * @CalledIn SMF 2.0, SMF 2.1
+	 * @version 1.1
+	 * @since 1.0
+	 * @return array The valid Search Types.
+	 */
+	private function handleLogSearchTypes(): array
+	{
+		return array(
 			'url' => array('sql' => 'l.url', 'label' => $this->txt('sfs_log_search_url')),
 			'member' => array('sql' => 'mem.real_name', 'label' => $this->txt('sfs_log_search_member')),
 			'username' => array('sql' => 'l.username', 'label' => $this->txt('sfs_log_search_username')),
@@ -1963,34 +2025,42 @@ class SFS
 			'ip' => array('sql' => 'lm.ip', 'label' => $this->txt('sfs_log_search_ip')),
 			'ip2' => array('sql' => 'lm.ip2', 'label' => $this->txt('sfs_log_search_ip2'))
 		);
-
-		// What we want to search for.
+	}
+ 
+ 	/**
+	 * Handle Search Params String
+	 *
+	 * @internal
+	 * @CalledIn SMF 2.0, SMF 2.1
+	 * @version 1.1
+	 * @since 1.0
+	 * @return string What we are searching for, validated and cleaned.
+	 */
+	private function handleLogSearchParamsString(): string
+	{
 		if (!isset($this->search_params['string']) || (!empty($_REQUEST['search']) && $this->search_params['string'] != $_REQUEST['search']))
-			$this->search_params_string = empty($_REQUEST['search']) ? '' : $_REQUEST['search'];
+			return empty($_REQUEST['search']) ? '' : $_REQUEST['search'];
 		else
-			$this->search_params_string = $this->search_params['string'];
+			return $this->search_params['string'];
+	}
+
+ 	/**
+	 * Handle Search Params Type
+	 *
+	 * @internal
+	 * @CalledIn SMF 2.0, SMF 2.1
+	 * @version 1.1
+	 * @since 1.0
+	 * @return string What we are searching for, validated and cleaned.
+	 */
+	private function handleLogSearchParamsType(): string
+	{
+		global $context;
 
 		if (isset($_REQUEST['search_type']) || empty($this->search_params['type']) || !isset($searchTypes[$this->search_params['type']]))
-			$this->search_params_type = isset($_REQUEST['search_type']) && isset($searchTypes[$_REQUEST['search_type']]) ? $_REQUEST['search_type'] : (isset($searchTypes[$context['order']]) ? $context['order'] : 'member');
+			return isset($_REQUEST['search_type']) && isset($this->search_types[$_REQUEST['search_type']]) ? $_REQUEST['search_type'] : (isset($this->search_types[$context['order']]) ? $context['order'] : 'member');
 		else
-			$this->search_params_type = $this->search_params['type'];
-
-		$this->search_params_column = $searchTypes[$this->search_params_type]['sql'];
-		$this->search_params = array(
-			'string' => $this->search_params_string,
-			'type' => $this->search_params_type,
-		);
-
-		// Setup the search context.
-		$context['search_params'] = empty($this->search_params['string']) ? '' : base64_encode(json_encode($this->search_params));
-		$this->logSearch = array(
-			'string' => $this->search_params['string'],
-			'type' => $this->search_params['type'],
-			'label' => $searchTypes[$this->search_params_type]['label'],
-		);
-
-		if (!empty($context['search_params']))
-			$url .= ';params=' . $context['search_params'];
+			return $this->search_params['type'];
 	}
 
 	/**
