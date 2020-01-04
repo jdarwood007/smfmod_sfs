@@ -30,7 +30,7 @@ class SFS
 		'email' => 2,
 		'ip' => 3
 	);
-	
+
 	/**
 	 * Simple setup for the class to be used later correctly.
 	 * This simply loads the class into $smcFunc and we can grab this anywhere else later.
@@ -46,7 +46,7 @@ class SFS
 	public static function hook_pre_load(): void
 	{
 		global $smcFunc, $sourcedir;
-		
+
 		$smcFunc['classSFS'] = new SFS();
 	}
 
@@ -210,7 +210,7 @@ class SFS
 				array('ip' => $user_info['ip']),
 				array('ip' => $user_info['ip2']),
 			), 'post');
-			
+
 		}
 		// Members and they don't have enough posts?
 		elseif (empty($user_info['posts']) || $user_info['posts'] < $modSettings['sfs_verfOptMemPostThreshold'])
@@ -389,7 +389,7 @@ class SFS
 		// SMF 2.0 has the fetch_web_data in the Subs-Packages, 2.1 it is in Subs.php.
 		if ($this->versionCheck('2.0', 'smf'))
 			require_once($sourcedir . '/Subs-Package.php');
-		
+
 		// Now we have a URL, lets go get it.
 		$result = fetch_web_data($requestURL);
 		if ($result === false)
@@ -861,7 +861,7 @@ class SFS
 			$encodeFunc = 'serialize';
 
 		$defaultSettings['sfs_verification_options'] = $encodeFunc(array('post'));
-		
+
 		// We undoing this? Maybe a save?
 		if ($undo)
 		{
@@ -1133,7 +1133,7 @@ class SFS
 	private function BanNewIPSMF21(string $ip_address): bool
 	{
 		global $smcFunc, $modSettings;
-	
+
 		// We don't call checkExistingTriggerIP as it induces a fatal error.
 		$request = $smcFunc['db_query']('', '
 			SELECT bg.id_ban_group, bg.name

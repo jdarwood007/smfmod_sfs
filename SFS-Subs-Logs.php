@@ -23,6 +23,7 @@ class SFSL
 	/**
 	 * @var mixed Search area handling.
 	 */
+	private $sort_order = 'time';
 	private $search_types = array();
 	private $search_params = array();
 	private $search_params_column = '';
@@ -73,7 +74,7 @@ class SFSL
 	public function __construct()
 	{
 		global $smcFunc;
-	
+
 		$this->SFSclass = &$smcFunc['classSFS'];
 		$this->SFSAclass = &SFSA::selfClass();
 	}
@@ -168,8 +169,8 @@ class SFSL
 
 		loadLanguage('Modlog');
 
-		$context['form_url'] = $this->SFSA->get('adminLogURL');
-		$context['log_url'] = $this->SFSA->get('adminLogURL');
+		$context['form_url'] = $this->SFSAclass->get('adminLogURL');
+		$context['log_url'] = $this->SFSAclass->get('adminLogURL');
 		$context['page_title'] = $this->SFSclass->txt('sfs_admin_logs');
 		$this->canDeleteLogs = allowedTo('admin_forum');
 
@@ -179,14 +180,40 @@ class SFSL
 
 		$sort_types = $this->handleLogsGetSortTypes();
 
-		$context['order'] = isset($_REQUEST['sort']) && isset($sort_types[$_REQUEST['sort']]) ? $_REQUEST['sort'] : 'time';
+		$this->sort_order = isset($_REQUEST['sort']) && isset($sort_types[$_REQUEST['sort']]) ? $_REQUEST['sort'] : 'time';
 
 		// Handle searches.
 		$this->handleLogSearch($context['log_url']);
 
 		require_once($sourcedir . '/Subs-List.php');
 
-		$listOptions = array(
+		$listOptions = $this->loadLogsListOptions();
+
+		// Create the watched user list.
+		createList($listOptions);
+
+		$context['sub_template'] = 'show_list';
+		$context['default_list'] = 'sfslog_list';
+
+		return array();
+	}
+
+	/**
+	 * Builds the list options data.
+	 *
+	 * @internal
+	 * @CalledIn SMF2.0, SMF 2.1
+	 * @See SFSA::getSFSLogEntries
+	 * @See SFSA::getSFSLogEntriesCount
+	 * @version 1.2
+	 * @since 1.2
+	 * @return array The list options data
+	 */
+	public function loadLogsListOptions(): array
+	{
+		global $context;
+
+		return array(
 			'id' => 'sfslog_list',
 			'title' => $this->SFSclass->txt('sfs_admin_logs'),
 			'width' => '100%',
@@ -223,14 +250,6 @@ class SFSL
 				$this->loadLogsGetAddtionalRow(),
 			),
 		);
-
-		// Create the watched user list.
-		createList($listOptions);
-
-		$context['sub_template'] = 'show_list';
-		$context['default_list'] = 'sfslog_list';
-
-		return array();
 	}
 
 	/**
@@ -646,7 +665,7 @@ class SFSL
 
 		$entries = array();
 		while ($row = $smcFunc['db_fetch_assoc']($result))
-			$entries[$row['id_sfs']] = $this->getSFSLogPrepareEntry($row);			
+			$entries[$row['id_sfs']] = $this->getSFSLogPrepareEntry($row);
 		$smcFunc['db_free_result']($result);
 
 		return $entries;
@@ -682,41 +701,77 @@ class SFSL
 			'result_raw' => $row['result'],
 		);
 
+		$return['checks'] = $this->getSFSLogPrepareEntryChecks($row, $checksDecoded);
+		$return['result'] = $this->getSFSLogPrepareEntryResult($row);
+
+		return $return;
+	}
+
+	/**
+	 * Processes the entry for the proper checks column.
+	 *
+	 * @param array $row The raw row data.
+	 *
+	 * @api
+	 * @CalledIn SMF 2.0, SMF 2.1
+	 * @See SFSA::getSFSLogEntries
+	 * @version 1.2
+	 * @since 1.2
+	 * @return string The formatted checks data.
+	 */
+	public function getSFSLogPrepareEntryChecks(array $row): string
+	{
 		$checksDecoded = $this->SFSclass->decodeJSON($row['checks']);
 
 		// If we know what check triggered this, link it up to be searched.
 		if ($row['id_type'] == 1)
-			$return['checks'] = '<a href="' . sprintf($this->urlSFSsearch, $checksDecoded['value']) . '">' . $checksDecoded['value'] . '</a>';
+			$checks = '<a href="' . sprintf($this->urlSFSsearch, $checksDecoded['value']) . '">' . $checksDecoded['value'] . '</a>';
 		elseif ($row['id_type'] == 2)
-			$return['checks'] = '<a href="' . sprintf($this->urlSFSsearch, $checksDecoded['value']) . '">' . $checksDecoded['value'] . '</a>';
+			$checks = '<a href="' . sprintf($this->urlSFSsearch, $checksDecoded['value']) . '">' . $checksDecoded['value'] . '</a>';
 		elseif ($row['id_type'] == 3)
-			$return['checks'] = '<a href="' . sprintf($this->urlSFSsearch, $checksDecoded['value']) . '">' . $checksDecoded['value'] . '</a>';
+			$checks = '<a href="' . sprintf($this->urlSFSsearch, $checksDecoded['value']) . '">' . $checksDecoded['value'] . '</a>';
 		// No idea what triggered it, parse it out cleanly.  Could be debug data as well.
 		else
 		{
-			$return['checks'] = '';
-
+			$checks = '';
 			foreach ($checksDecoded as $ckey => $vkey)
 				foreach ($vkey as $key => $value)
-					$return['checks'] .= ucfirst($key) . ':' . $value . '<br>';					
+					$checks .= ucfirst($key) . ':' . $value . '<br>';
 		}
 
+		return $checks;
+	}
+
+	/**
+	 * Processes the entry for the proper results column.
+	 *
+	 * @param array $row The raw row data.
+	 *
+	 * @api
+	 * @CalledIn SMF 2.0, SMF 2.1
+	 * @See SFSA::getSFSLogEntries
+	 * @version 1.2
+	 * @since 1.2
+	 * @return string The formated results entry.
+	 */
+	public function getSFSLogPrepareEntryResult(array $row = array()): string
+	{
 		// This tells us what it matched on exactly.
 		if (strpos($row['result'], ',') !== false)
 		{
 			list($resultType, $resultMatch, $extra) = explode(',', $row['result'] . ',,,');
-			$return['result'] = sprintf($this->SFSclass->txt('sfs_log_matched_on'), $resultType, $resultMatch);
+			$result = sprintf($this->SFSclass->txt('sfs_log_matched_on'), $resultType, $resultMatch);
 
 			// If this was a IP ban, note it.
 			if ($resultType == 'ip' && !empty($extra))
-				$return['result'] .= ' ' . $this->SFSclass->txt('sfs_log_auto_banned');			
+				$result .= ' ' . $this->SFSclass->txt('sfs_log_auto_banned');
 			if ($resultType == 'username' && !empty($extra))
-				$return['result'] .= ' ' . sprintf($this->SFSclass->txt('sfs_log_confidence'), $extra);			
-		}
-		else
-			$return['result'] = $row['result'];
+				$result .= ' ' . sprintf($this->SFSclass->txt('sfs_log_confidence'), $extra);
 
-		return $return;
+			return $result;
+		}
+
+		return $row['result'];
 	}
 
 	/**
@@ -869,7 +924,7 @@ class SFSL
 			if (!empty($search_params))
 				return $search_params;
 		}
-	
+
 		return array();
 	}
 
@@ -893,7 +948,7 @@ class SFSL
 			'ip2' => array('sql' => 'lm.ip2', 'label' => $this->SFSclass->txt('sfs_log_search_ip2'))
 		);
 	}
- 
+
 	/**
 	 * Handle Search Params String
 	 *
@@ -925,7 +980,13 @@ class SFSL
 		global $context;
 
 		if (isset($_REQUEST['search_type']) || empty($this->search_params['type']) || !isset($this->search_types[$this->search_params['type']]))
-			return isset($_REQUEST['search_type']) && isset($this->search_types[$_REQUEST['search_type']]) ? $_REQUEST['search_type'] : (isset($this->search_types[$context['order']]) ? $context['order'] : 'member');
+		{
+			if (isset($_REQUEST['search_type']) && isset($this->search_types[$_REQUEST['search_type']]))
+				return (string) $_REQUEST['search_type'];
+			if (isset($this->search_types[$this->sort_order]))
+			 	return $this->sort_order;
+			 return 'member';
+		}
 		return $this->search_params['type'];
 	}
 }
