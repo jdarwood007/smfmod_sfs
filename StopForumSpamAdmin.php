@@ -26,12 +26,6 @@ class SFSA
 	private $adminLogURL = null;
 
 	/**
-	 * @var array Our settings information used on saving/changing settings.
-	 */
-	private $changedSettings = array();
-	private $extraVerificationOptions = array();
-
-	/**
 	 * @var mixed Search area handling.
 	 */
 	private $search_types = array();
@@ -52,7 +46,7 @@ class SFSA
 	 *
 	 * @version 1.0
 	 * @since 1.0
-	 * @return void No return is generated
+	 * @return object The SFS Admin class is returned.
 	 */
 	public static function selfClass()
 	{
@@ -81,9 +75,6 @@ class SFSA
 		global $smcFunc;
 	
 		$this->SFSclass = &$smcFunc['classSFS'];
-
-		// Is this SMF 2.0?
-		$this->softwareVersion = $smcFunc['classSFS']->get('softwareVersion');
 	}
 
 	/**
@@ -283,7 +274,7 @@ class SFSA
 		if (isset($_GET['save']))
 		{
 			// Turn the defaults off.
-			$this->unloadDefaults();
+			$this->SFSclass->unloadDefaults();
 			checkSession();
 
 			// If we are automatically banning IPs, make sure we have a ban group.

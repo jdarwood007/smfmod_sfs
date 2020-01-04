@@ -11,10 +11,10 @@
 class SFS
 {
 	/**
-	 * @var string URLS we need to SFS for UI presentation.
+	 * @var array Our settings information used on saving/changing settings.
 	 */
-	private $urlSFSipCheck = 'https://www.stopforumspam.com/ipcheck/%1$s';
-	private $urlSFSsearch = 'https://www.stopforumspam.com/search/%1$s';
+	private $changedSettings = array();
+	private $extraVerificationOptions = array();
 
 	/**
 	 * @var string Name of the software and its version.  This is so we can branch out from the same base.
