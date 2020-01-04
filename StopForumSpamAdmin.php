@@ -1058,7 +1058,7 @@ class SFSA
 		// If we have something to search for saved, get it back out.
 		if (!empty($_REQUEST['params']) && empty($_REQUEST['is_search']))
 		{
-			$search_params = base64_decode(strtr($params, array(' ' => '+')));
+			$search_params = base64_decode(strtr($_REQUEST['params'], array(' ' => '+')));
 			$search_params = $this->SFSclass->decodeJSON($search_params);
 
 			if (!empty($search_params))
@@ -1106,14 +1106,14 @@ class SFSA
 			return $this->search_params['string'];
 	}
 
- 	/**
+	/**
 	 * Handle Search Params Type
 	 *
 	 * @internal
 	 * @CalledIn SMF 2.0, SMF 2.1
 	 * @version 1.1
 	 * @since 1.0
-	 * @return string What we are searching for, validated and cleaned.
+	 * @return string The column we are searching.
 	 */
 	private function handleLogSearchParamsType(): string
 	{
