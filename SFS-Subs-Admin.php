@@ -54,8 +54,13 @@ class SFSA
 
 		if (is_null(self::$SFSAclass))
 		{
-			self::$SFSAclass = new SFSA();
-			$smcFunc['SFSA'] = self::$SFSAclass;
+			if (!empty($smcFunc['SFSA']))
+				self::$SFSAclass = $smcFunc['SFSA'];
+			else
+			{
+				self::$SFSAclass = new SFSA();
+				$smcFunc['SFSA'] = self::$SFSAclass;
+			}
 		}
 
 		return self::$SFSAclass;

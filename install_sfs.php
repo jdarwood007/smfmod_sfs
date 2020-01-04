@@ -52,71 +52,160 @@ $smcFunc['db_create_table']($table['table_name'], $table['columns'], $table['ind
 /*
  * Calculates the proper settings to use in a column.
  *
+ * @version 1.2
  * @since 1.0
 */
 function db_field($name, $type, $size = 0, $unsigned = true, $auto = false)
 {
 	$fields = array(
-		'varchar' => array(
-			'auto' => false,
-			'type' => 'varchar',
-			'size' => $size == 0 ? 50 : $size,
-			'null' => false,
-		),
-		'text' => array(
-			'auto' => false,
-			'type' => 'text',
-			'null' => false,
-		),
-		'mediumtext' => array(
-			'auto' => false,
-			'type' => 'mediumtext',
-			'null' => false,
-		),
-		'tinyint' => array(
-			'auto' => $auto,
-			'type' => 'tinyint',
-			'default' => 0,
-			'size' => empty($unsigned) ? 4 : 3,
-			'unsigned' => $unsigned,
-			'null' => false,
-		),
-		'smallint' => array(
-			'auto' => $auto,
-			'type' => 'smallint',
-			'default' => 0,
-			'size' => empty($unsigned) ? 6 : 5,
-			'unsigned' => $unsigned,
-			'null' => false,
-		),
-		'mediumint' => array(
-			'auto' => $auto,
-			'type' => 'mediumint',
-			'default' => 0,
-			'size' => 8,
-			'unsigned' => $unsigned,
-			'null' => false,
-		),
-		'int' => array(
-			'auto' => $auto,
-			'type' => 'int',
-			'default' => 0,
-			'size' => empty($unsigned) ? 11 : 10,
-			'unsigned' => $unsigned,
-			'null' => false,
-		),
-		'bigint' => array(
-			'auto' => $auto,
-			'type' => 'bigint',
-			'default' => 0,
-			'size' => 21,
-			'unsigned' => $unsigned,
-			'null' => false,
-		),
+		'varchar' => db_field_varchar($size, $unsigned, $auto),
+		'text' => db_field_text($size, $unsigned, $auto),
+		'mediumtext' => db_field_mediumtext($size, $unsigned, $auto),
+		'tinyint' => db_field_tinyint($size, $unsigned, $auto),
+		'smallint' => db_field_smallint($size, $unsigned, $auto),
+		'mediumint' => db_field_mediumint($size, $unsigned, $auto),
+		'int' => db_field_int($size, $unsigned, $auto),
+		'bigint' => db_field_bigint($size, $unsigned, $auto),
 	);
 
 	$field = $fields[$type];
 	$field['name'] = $name;
 
 	return $field;
+}
+
+/*
+ * Database Field - varchar.
+ *
+ * @version 1.2
+ * @since 1.2
+*/
+function db_field_varchar($size = 0, $unsigned = true, $auto = false)
+{
+	return array(
+		'auto' => false,
+		'type' => 'varchar',
+		'size' => $size == 0 ? 50 : $size,
+		'null' => false,
+	);
+}
+
+/*
+ * Database Field - text.
+ *
+ * @version 1.2
+ * @since 1.2
+*/
+function db_field_text($size = 0, $unsigned = true, $auto = false)
+{
+	return array(
+		'auto' => false,
+		'type' => 'text',
+		'null' => false,
+	);
+}
+
+/*
+ * Database Field - mediumtext.
+ *
+ * @version 1.2
+ * @since 1.2
+*/
+function db_field_mediumtext($size = 0, $unsigned = true, $auto = false)
+{
+	return array(
+		'auto' => false,
+		'type' => 'mediumtext',
+		'null' => false,
+	);
+}
+
+/*
+ * Database Field - tinyint.
+ *
+ * @version 1.2
+ * @since 1.2
+*/
+function db_field_tinyint($size = 0, $unsigned = true, $auto = false)
+{
+	return array(
+		'auto' => $auto,
+		'type' => 'tinyint',
+		'default' => 0,
+		'size' => empty($unsigned) ? 4 : 3,
+		'unsigned' => $unsigned,
+		'null' => false,
+	);
+}
+
+/*
+ * Database Field - small int.
+ *
+ * @version 1.2
+ * @since 1.2
+*/
+function db_field_smallint($size = 0, $unsigned = true, $auto = false)
+{
+	return array(
+		'auto' => $auto,
+		'type' => 'smallint',
+		'default' => 0,
+		'size' => empty($unsigned) ? 6 : 5,
+		'unsigned' => $unsigned,
+		'null' => false,
+	);
+}
+
+/*
+ * Database Field - mediumn int.
+ *
+ * @version 1.2
+ * @since 1.2
+*/
+function db_field_mediumint($size = 0, $unsigned = true, $auto = false)
+{
+	return array(
+		'auto' => $auto,
+		'type' => 'mediumint',
+		'default' => 0,
+		'size' => 8,
+		'unsigned' => $unsigned,
+		'null' => false,
+	);
+}
+
+/*
+ * Database Field - int.
+ *
+ * @version 1.2
+ * @since 1.2
+*/
+function db_field_int($size = 0, $unsigned = true, $auto = false)
+{
+	return array(
+		'auto' => $auto,
+		'type' => 'int',
+		'default' => 0,
+		'size' => empty($unsigned) ? 11 : 10,
+		'unsigned' => $unsigned,
+		'null' => false,
+	);
+}
+
+/*
+ * Database Field - big int.
+ *
+ * @version 1.2
+ * @since 1.2
+*/
+function db_field_bigint($size = 0, $unsigned = true, $auto = false)
+{
+	return array(
+		'auto' => $auto,
+		'type' => 'bigint',
+		'default' => 0,
+		'size' => 21,
+		'unsigned' => $unsigned,
+		'null' => false,
+	);
 }

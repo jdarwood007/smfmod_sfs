@@ -40,17 +40,19 @@
 		<database>install_sfs.php</database>
 
 		<require-file name="language/StopForumSpam.english.php" destination="$themes_dir/default/languages" />
-		<require-file name="StopForumSpam.php" destination="$sourcedir" />
+		<require-file name="SFS.php" destination="$sourcedir" />
+		<require-file name="SFS-Subs-Admin.php" destination="$sourcedir" />
+		<require-file name="SFS-Subs-Logs.php" destination="$sourcedir" />
 
 		<!-- All the hooks -->
 			<!-- Main Section -->
-			<hook hook="integrate_pre_include" function="$sourcedir/StopForumSpam.php" />
+			<hook hook="integrate_pre_include" function="$sourcedir/SFS.php" />
 			<hook hook="integrate_pre_load" function="SFS::hook_pre_load" />
 			<hook hook="integrate_register" function="SFS::hook_register" />
 			<hook hook="integrate_create_control_verification_test" function="SFS::hook_create_control_verification_test" />
 
 			<!-- Admin Section -->
-			<hook hook="integrate_admin_include" function="$sourcedir/StopForumSpamAdmin.php" />
+			<hook hook="integrate_admin_include" function="$sourcedir/SFS-Subs-Admin.php" />
 			<hook hook="integrate_admin_areas" function="SFSA::hook_admin_areas" />
 			<hook hook="integrate_modify_modifications" function="SFSA::hook_modify_modifications" />
 			<hook hook="integrate_manage_logs" function="SFSA::hook_manage_logs" />
@@ -65,13 +67,13 @@
 
 		<!-- All the hooks, removed -->
 			<!-- Main Section -->
-			<hook hook="integrate_pre_include" function="$sourcedir/StopForumSpam.php" reverse="true" />
+			<hook hook="integrate_pre_include" function="$sourcedir/SFS.php" reverse="true" />
 			<hook hook="integrate_pre_load" function="SFS::hook_pre_load" reverse="true" />
 			<hook hook="integrate_register" function="SFS::hook_register" reverse="true" />
 			<hook hook="integrate_create_control_verification_test" function="SFSA::hook_create_control_verification_test" reverse="true" />
 
 			<!-- Admin Section -->
-			<hook hook="integrate_admin_include" function="$sourcedir/StopForumSpamAdmin.php" reverse="true" />
+			<hook hook="integrate_admin_include" function="$sourcedir/SFS-Subs-Admin.php" reverse="true" />
 			<hook hook="integrate_admin_areas" function="SFSA::hook_admin_areas" reverse="true" />
 			<hook hook="integrate_modify_modifications" function="SFSA::hook_modify_modifications" reverse="true" />
 			<hook hook="integrate_manage_logs" function="SFSA::hook_manage_logs" reverse="true" />
@@ -80,7 +82,9 @@
 		<remove-file name="$themes_dir/default/languages/StopForumSpam.english.php" />
 
 		<!-- source files, removed -->
-		<remove-file name="$sourcedir/StopForumSpam.php" />
+		<remove-file name="$sourcedir/SFS.php" />
+		<remove-file name="$sourcedir/SFS-Subs-Admin.php" />
+		<remove-file name="$sourcedir/SFS-Subs-Logs.php" />
 	</uninstall>
 
 </package-info>
