@@ -701,7 +701,7 @@ class SFSL
 			'result_raw' => $row['result'],
 		);
 
-		$return['checks'] = $this->getSFSLogPrepareEntryChecks($row, $checksDecoded);
+		$return['checks'] = $this->getSFSLogPrepareEntryChecks($row);
 		$return['result'] = $this->getSFSLogPrepareEntryResult($row);
 
 		return $return;
