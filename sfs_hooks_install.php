@@ -19,12 +19,16 @@ if (SMF == 'SSI')
 	db_extend('packages');
 
 $hooks = array(
+	// Main sections.
 	'integrate_pre_include' => '$sourcedir/StopForumSpam.php',
 	'integrate_pre_load' => 'SFS::hook_pre_load',
-	'integrate_admin_areas' => 'SFS::hook_admin_areas',
-	'integrate_modify_modifications' => 'SFS::hook_modify_modifications',
 	'integrate_register' => 'SFS::hook_register',
-	'integrate_manage_logs' => 'SFS::hook_manage_logs'
+
+	// Admin Sections.
+	'integrate_admin_include' => '$sourcedir/StopForumSpamAdmin.php',
+	'integrate_admin_areas' => 'SFSA::hook_admin_areas',
+	'integrate_modify_modifications' => 'SFSA::hook_modify_modifications',
+	'integrate_manage_logs' => 'SFSA::hook_manage_logs'
 );
 
 foreach ($hooks as $hook => $func)
