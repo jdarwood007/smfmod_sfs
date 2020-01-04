@@ -179,7 +179,7 @@ class SFS
 
 		foreach ($verificationMap as $key => $extendedChecks)
 			if ($thisVerification['id'] == $key && in_array($key, $options))
-				return call_user_func($this, 'checkVerificationTest' . ucfirst($key));
+				return call_user_func(array($this, 'checkVerificationTest' . ucfirst($key)));
 
 		// Others areas.  We have to play a guessing game here.
 		return $this->checkVerificationTestExtra($thisVerification);
@@ -809,11 +809,13 @@ class SFS
 		$optionsKeyExtra = $user_info['is_guest'] ? 'sfs_verification_options_extra' : 'sfs_verOptionsMemExtra';
 
 		// Standard options.
-		$options = array();
 		if ($this->versionCheck('2.0', 'smf') && !empty($modSettings[$optionsKey]))
 			$options = safe_unserialize($modSettings[$optionsKey]);
 		elseif (!empty($modSettings[$optionsKey]))
 			$options = $this->decodeJSON($modSettings[$optionsKey]);
+
+		if (empty($options))
+			$options = array();
 
 		// Extras.
 		if (!empty($modSettings[$optionsKeyExtra]))

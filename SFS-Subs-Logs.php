@@ -646,7 +646,7 @@ class SFSL
 
 		$entries = array();
 		while ($row = $smcFunc['db_fetch_assoc']($result))
-			$entries[$row['id_sfs']] => $this->getSFSLogPrepareEntry($row);			
+			$entries[$row['id_sfs']] = $this->getSFSLogPrepareEntry($row);			
 		$smcFunc['db_free_result']($result);
 
 		return $entries;

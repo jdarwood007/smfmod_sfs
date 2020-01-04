@@ -58,14 +58,14 @@ $smcFunc['db_create_table']($table['table_name'], $table['columns'], $table['ind
 function db_field($name, $type, $size = 0, $unsigned = true, $auto = false)
 {
 	$fields = array(
-		'varchar' => db_field_varchar($size, $unsigned, $auto),
-		'text' => db_field_text($size, $unsigned, $auto),
-		'mediumtext' => db_field_mediumtext($size, $unsigned, $auto),
-		'tinyint' => db_field_tinyint($size, $unsigned, $auto),
-		'smallint' => db_field_smallint($size, $unsigned, $auto),
-		'mediumint' => db_field_mediumint($size, $unsigned, $auto),
-		'int' => db_field_int($size, $unsigned, $auto),
-		'bigint' => db_field_bigint($size, $unsigned, $auto),
+		'varchar' => db_field_varchar($size),
+		'text' => db_field_text(),
+		'mediumtext' => db_field_mediumtext(),
+		'tinyint' => db_field_tinyint($unsigned, $auto),
+		'smallint' => db_field_smallint($unsigned, $auto),
+		'mediumint' => db_field_mediumint($unsigned, $auto),
+		'int' => db_field_int($unsigned, $auto),
+		'bigint' => db_field_bigint($unsigned, $auto),
 	);
 
 	$field = $fields[$type];
@@ -80,7 +80,7 @@ function db_field($name, $type, $size = 0, $unsigned = true, $auto = false)
  * @version 1.2
  * @since 1.2
 */
-function db_field_varchar($size = 0, $unsigned = true, $auto = false)
+function db_field_varchar($size = 0)
 {
 	return array(
 		'auto' => false,
@@ -96,7 +96,7 @@ function db_field_varchar($size = 0, $unsigned = true, $auto = false)
  * @version 1.2
  * @since 1.2
 */
-function db_field_text($size = 0, $unsigned = true, $auto = false)
+function db_field_text()
 {
 	return array(
 		'auto' => false,
@@ -111,7 +111,7 @@ function db_field_text($size = 0, $unsigned = true, $auto = false)
  * @version 1.2
  * @since 1.2
 */
-function db_field_mediumtext($size = 0, $unsigned = true, $auto = false)
+function db_field_mediumtext()
 {
 	return array(
 		'auto' => false,
@@ -126,7 +126,7 @@ function db_field_mediumtext($size = 0, $unsigned = true, $auto = false)
  * @version 1.2
  * @since 1.2
 */
-function db_field_tinyint($size = 0, $unsigned = true, $auto = false)
+function db_field_tinyint($unsigned = true, $auto = false)
 {
 	return array(
 		'auto' => $auto,
@@ -144,7 +144,7 @@ function db_field_tinyint($size = 0, $unsigned = true, $auto = false)
  * @version 1.2
  * @since 1.2
 */
-function db_field_smallint($size = 0, $unsigned = true, $auto = false)
+function db_field_smallint($unsigned = true, $auto = false)
 {
 	return array(
 		'auto' => $auto,
@@ -162,7 +162,7 @@ function db_field_smallint($size = 0, $unsigned = true, $auto = false)
  * @version 1.2
  * @since 1.2
 */
-function db_field_mediumint($size = 0, $unsigned = true, $auto = false)
+function db_field_mediumint($unsigned = true, $auto = false)
 {
 	return array(
 		'auto' => $auto,
@@ -180,7 +180,7 @@ function db_field_mediumint($size = 0, $unsigned = true, $auto = false)
  * @version 1.2
  * @since 1.2
 */
-function db_field_int($size = 0, $unsigned = true, $auto = false)
+function db_field_int($unsigned = true, $auto = false)
 {
 	return array(
 		'auto' => $auto,
@@ -198,7 +198,7 @@ function db_field_int($size = 0, $unsigned = true, $auto = false)
  * @version 1.2
  * @since 1.2
 */
-function db_field_bigint($size = 0, $unsigned = true, $auto = false)
+function db_field_bigint($unsigned = true, $auto = false)
 {
 	return array(
 		'auto' => $auto,
