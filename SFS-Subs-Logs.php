@@ -76,7 +76,7 @@ class SFSL
 		global $smcFunc;
 
 		$this->SFSclass = &$smcFunc['classSFS'];
-		$this->SFSAclass = &SFSA::selfClass();
+		$this->SFSAclass = SFSA::selfClass();
 	}
 
 	/**

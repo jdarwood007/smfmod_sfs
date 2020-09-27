@@ -295,7 +295,7 @@ class SFS
 			foreach ($possibleUserNames as $searchKey)
 				if (!empty($_POST[$searchKey]))
 				{
-					$checks[] = array('username', $_POST[$searchKey]);
+					$checks[] = array('username' => $_POST[$searchKey]);
 					break;
 				}
 
@@ -304,7 +304,7 @@ class SFS
 			foreach ($possibleUserNames as $searchKey)
 				if (!empty($_POST[$searchKey]))
 				{
-					$checks[] = array('email', $_POST[$searchKey]);
+					$checks[] = array('email' => $_POST[$searchKey]);
 					break;
 				}
 

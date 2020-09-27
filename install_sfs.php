@@ -27,6 +27,7 @@ $table = array(
 		db_field('id_member', 'mediumint'),
 		db_field('username', 'varchar', 255),
 		db_field('email', 'varchar', 255),
+		db_field('url', 'varchar', 255),
 		db_field('ip', 'varchar', 255),
 		db_field('ip2', 'varchar', 255),
 		db_field('checks', 'mediumtext'),

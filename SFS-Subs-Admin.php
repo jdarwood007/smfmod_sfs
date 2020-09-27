@@ -134,13 +134,13 @@ class SFSA
 		}
 		else
 		{
-			$this->adminPageURL = $scripturl . '?action=admin;area=securitysettings;sa=sfs';
+			$this->adminPageURL = $scripturl . '?action=admin;area=modsettings;sa=sfs';
 			$this->adminLogURL = $scripturl . '?action=admin;area=logs;sa=sfslog';
 
-			$admin_areas['config']['areas']['securitysettings']['subsections']['sfs'] = array(
+			$admin_areas['config']['areas']['modsettings']['subsections']['sfs'] = array(
 				$this->SFSclass->txt('sfs_admin_area')
 			);
-			$admin_areas['config']['areas']['securitysettings']['subsections']['sfslog'] = array(
+			$admin_areas['maintenance']['areas']['logs']['subsections']['sfslog'] = array(
 				$this->SFSclass->txt('sfs_admin_logs')
 			);
 		}
@@ -234,7 +234,7 @@ class SFSA
 				array('check', 'sfs_emailcheck'),
 			'',
 				array('check', 'sfs_usernamecheck'),
-				array('float', 'sfs_username_confidence'),
+				array('float', 'sfs_username_confidence', 'step' => '0.01'),
 			'',
 				array('check', 'sfs_ipcheck'),
 				array('check', 'sfs_ipcheck_autoban'),
@@ -316,7 +316,7 @@ class SFSA
 	public static function hook_manage_logs(array &$log_functions): bool
 	{
 		// Add our logs sub action.
-		$log_functions['sfslog'] = array('StopForumSpam.php', 'startupLogs');
+		$log_functions['sfslog'] = array('SFS-Subs-Logs.php', 'SFSL::startupLogs');
 
 		return self::selfClass()->AddToLogMenu($log_functions);
 	}
@@ -954,6 +954,21 @@ class SFSA
 		$smcFunc['db_free_result']($result);
 
 		return (int) $entry_count;
+	}
+
+	/**
+	 * Get params
+	 *
+	 * @internal
+	 * @CalledIn SMF 2.0, SMF 2.1
+	 * @version 1.1
+	 * @since 1.0
+	 * @return string The column we are searching.
+	 */
+	public function get(string $var)
+	{
+		if (isset($this->{$var}))
+			return $this->{$var};
 	}
 
 	/**
