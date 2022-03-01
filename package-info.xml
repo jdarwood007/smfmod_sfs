@@ -36,7 +36,7 @@
 		<remove-dir name="$sourcedir/StopForumSpam.php" />
 	</uninstall>
 
-	<install for="2.1 RC4, 2.1.*">
+	<install for="2.1.*">
 		<database>install_sfs.php</database>
 
 		<require-file name="language/StopForumSpam.english.php" destination="$themes_dir/default/languages" />
@@ -60,7 +60,7 @@
 		<redirect url="?action=admin;area=securitysettings;sa=sfs" />
 	</install>
 
-	<uninstall for="2.1 RC4, 2.1.*">
+	<uninstall for="2.1.*">
 		<!-- database changes, undone -->
 		<database>install_sfs.php</database>
 
@@ -69,7 +69,7 @@
 			<hook hook="integrate_pre_include" function="$sourcedir/SFS.php" reverse="true" />
 			<hook hook="integrate_pre_load" function="SFS::hook_pre_load" reverse="true" />
 			<hook hook="integrate_register" function="SFS::hook_register" reverse="true" />
-			<hook hook="integrate_create_control_verification_test" function="SFSA::hook_create_control_verification_test" reverse="true" />
+			<hook hook="integrate_create_control_verification_test" function="SFS::hook_create_control_verification_test" reverse="true" />
 
 			<!-- Admin Section -->
 			<hook hook="integrate_admin_include" function="$sourcedir/SFS-Subs-Admin.php" reverse="true" />
