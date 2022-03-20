@@ -1,11 +1,11 @@
-# Stop Forum Spam
-### Description
-This customization adds support for detecting spam by using the [Stop Forum Spam](https://www.stopforumspam.com/) API.
+[size=4]Stop Forum Spam[/size]
+[size=3]Description[/size]
+This customization adds support for detecting spam by using the [url=https://www.stopforumspam.com/]Stop Forum Spam[/url] API.
 
-### SMF Version support
+[size=3]SMF Version support[/size]
 This supports SMF 2.0.x and 2.1.x
 
-### Sections checked
+[size=3]Sections checked[/size]
 On registration this can check the following fields:
 - Username
 - Email Address
@@ -25,12 +25,12 @@ On Report(ing) posts this can check:
 - 
 This can also check custom forms by specifying the id of the field in a comma separated list into the extra fields options.
 
-### Setup
+[size=3]Setup[/size]
 Out of the box this has a default configuration of checking only usernames.  Additionally the confidence level for username can be adjusted.
 
 This can also block TOR as reported to the Stop Forum Spam database.
 
 The Verification Options section controls on which controls we are enforcing these checks again.
 
-### Compatibility
+[size=3]Compatibility[/size]
 This has some setting compatibility with the original Stop Forum Spam as I was using it when I developed this.  The biggest difference is this supports SMF 2.1 and does not use any edits.  This version includes logging, bulk checks and the ability to check non standard SMF verification fields.

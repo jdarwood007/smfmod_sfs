@@ -40,6 +40,7 @@ $txt['sfs_verification_desc'] = 'Usage of these options reuqire Anti-Spam Verifi
 
 /* Admin Section: Verification Options for guests */
 $txt['sfs_verification_options'] = 'Guest Verification Sections';
+$txt['sfs_verOptionsMembers'] = 'Member Verification Sections';
 $txt['sfs_verification_options_post'] = 'Posting';
 $txt['sfs_verification_options_report'] = 'Reporting Topics';
 $txt['sfs_verification_options_search'] = 'Search (Not Recommended)';

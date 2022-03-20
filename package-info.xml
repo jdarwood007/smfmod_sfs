@@ -12,6 +12,7 @@
 
 	<!-- 2.0 has no support for hooks -->
 	<install for="2.0.*">
+		<readme type="file" parsebbc="true">README.bbc</readme>
 		<database>install_sfs.php</database>
 		<code type="file">sfs_hooks_install.php</code>
 		<modification>install_smf20.xml</modification>
@@ -37,6 +38,7 @@
 	</uninstall>
 
 	<install for="2.1.*">
+		<readme type="file" parsebbc="true">README.bbc</readme>
 		<database>install_sfs.php</database>
 
 		<require-file name="language/StopForumSpam.english.php" destination="$themes_dir/default/languages" />
@@ -57,7 +59,7 @@
 			<hook hook="integrate_modify_modifications" function="SFSA::hook_modify_modifications" />
 			<hook hook="integrate_manage_logs" function="SFSA::hook_manage_logs" />
 
-		<redirect url="?action=admin;area=securitysettings;sa=sfs" />
+		<redirect url="?action=admin;area=modsettings;sa=sfs" />
 	</install>
 
 	<uninstall for="2.1.*">
