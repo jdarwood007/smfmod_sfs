@@ -16,6 +16,8 @@ $txt['sfs_ipcheck_autoban'] = 'Automatically ban IPs that are blacklisted?';
 $txt['sfs_usernamecheck'] = 'Check Username?';
 $txt['sfs_username_confidence'] = 'Confidence level for usernames on registration';
 $txt['sfs_emailcheck'] = 'Check Email? (Recommended)';
+$txt['sfs_enablesubmission'] = 'Enable Submissions';
+$txt['sfs_apikey'] = '<a href="https://www.stopforumspam.com/keys">API Key</a>';
 
 /* Admin section: Region Config */
 $txt['sfs_region'] = 'Geographic Access Region';
@@ -89,3 +91,23 @@ $txt['sfs_log_confidence'] = 'Confidence Level: %1$s';
 $txt['sfs_ban_group_name'] = 'SFS Automatic IP Bans';
 $txt['sfs_ban_group_reason'] = 'Your IP has triggered the automatic ban for poor reputation and has been blacklisted';
 $txt['sfs_ban_group_notes'] = 'This Group is automatically created by the Stop Forum Spam Customization and automatically will add IPs that are blacklisted to this group';
+
+// Profile menu
+$txt['sfs_profile'] = 'Track Stop Forum Spam';
+$txt['sfs_check'] = 'Check';
+$txt['sfs_result'] = 'Result';
+$txt['sfs_check_username'] = 'Username';
+$txt['sfs_check_email'] = 'Email';
+$txt['sfs_check_ip'] = 'IP Address';
+$txt['sfs_last_seen'] = 'Last Seen';
+$txt['sfs_confidence'] = 'Confidence';
+$txt['sfs_frequency'] = 'Frequency';
+$txt['sfs_torexit'] = 'TOR Exit Node';
+
+// Profile section Submission
+$txt['sfs_submit_title'] = 'Stop Forum Spam Submission';
+$txt['sfs_submit'] = 'Submit to Stop Forum Spam';
+$txt['sfs_submit_ban'] = 'Submit to Stop Forum Spam and Start ban process';
+$txt['sfs_evidence'] = 'Evidence';
+$txt['sfs_submission_error'] = 'Submission Error';
+$txt['sfs_submission_success'] = 'Submission Success';

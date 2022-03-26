@@ -250,7 +250,9 @@ class SFSA
 					1 => $this->SFSclass->txt('sfs_tor_check_ignore'),
 					2 => $this->SFSclass->txt('sfs_tor_check_bad'),
 				)),
-
+			'',
+				array('check', 'sfs_enablesubmission'),
+				array('text', 'sfs_apikey'),
 			'',
 				array('title', 'sfsverftitle', 'label' => $this->SFSclass->txt('sfs_verification_title')),
 				array('desc', 'sfsverfdesc', 'label' => $this->SFSclass->txt('sfs_verification_desc')),

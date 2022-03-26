@@ -28,7 +28,10 @@ $hooks = array(
 	'integrate_admin_include' => '$sourcedir/SFS-Subs-Admin.php',
 	'integrate_admin_areas' => 'SFSA::hook_admin_areas',
 	'integrate_modify_modifications' => 'SFSA::hook_modify_modifications',
-	'integrate_manage_logs' => 'SFSA::hook_manage_logs'
+	'integrate_manage_logs' => 'SFSA::hook_manage_logs',
+
+	// Profile Section.
+	'integrate_profile_areas' => 'SFS::hook_pre_profile_areas'
 );
 
 foreach ($hooks as $hook => $func)

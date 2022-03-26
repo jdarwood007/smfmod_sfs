@@ -186,6 +186,152 @@ class SFS
 	}
 
 	/**
+	 * The hook to setup profile menu.
+	 *
+	 * @param array $profile_areas All the profile areas.
+	 *
+	 * @api
+	 * @CalledIn SMF 2.1
+	 * @See SFS::setupProfileMenu
+	 * @version 1.1
+	 * @since 1.1
+	 * @uses integrate_pre_profile_areas - Hook SMF2.1
+	 * @return void the passed $profile_areas is modified.
+	 */
+	public static function hook_pre_profile_areas(array &$profile_areas): void
+	{
+		global $smcFunc;
+		$smcFunc['classSFS']->setupProfileMenu($profile_areas);
+	}
+
+	/**
+	 * The hook to setup profile menu.
+	 *
+	 * @param array $profile_areas All the profile areas.
+	 *
+	 * @api
+	 * @CalledIn SMF 2.1
+	 * @version 1.1
+	 * @since 1.1
+	 * @uses integrate_pre_profile_areas - Hook SMF2.1
+	 * @return void the passed $profile_areas is modified.
+	 */
+	public function setupProfileMenu(array &$profile_areas): void
+	{
+		$profile_areas['info']['areas']['sfs'] = [
+			'label' => $this->txt('sfs_profile'),
+			'file' => 'SFS.php',
+			'function' => 'SFS::ProfileTrackSFS',
+			'permission' => [
+				'own' => ['moderate_forum'],
+				'any' => ['moderate_forum'],
+			],
+		];
+	}
+
+	/**
+	 * The caller for a profile check.
+	 *
+	 * @param int $memID The id of the member we are checking.
+	 *
+	 * @api
+	 * @CalledIn SMF 2.1
+	 * @version 1.1
+	 * @since 1.1
+	 * @return void the passed $profile_areas is modified.
+	 */
+	public static function ProfileTrackSFS(int $memID): void
+	{
+		global $smcFunc;
+		$smcFunc['classSFS']->TrackSFS($memID);
+	}
+
+	/**
+	 * The caller for a profile check.
+	 *
+	 * @param int $memID The id of the member we are checking.
+	 *
+	 * @api
+	 * @CalledIn SMF 2.1
+	 * @version 1.1
+	 * @since 1.1
+	 * @return void the passed $profile_areas is modified.
+	 */
+	public function TrackSFS(int $memID): void
+	{
+		global $user_profile, $context, $smcFunc, $scripturl, $modSettings;
+
+		isAllowedTo('moderate_forum');
+
+		// We need this stuff.
+		$context['sfs_allow_submit'] = !empty($modSettings['sfs_enablesubmission']) && !empty($modSettings['sfs_apikey']);
+		$context['token_check'] = 'sfs_submit-' . $memID;
+		$cache_key = 'sfs_check_member-' . $memID;
+
+		// Are we submitting this?
+		if ($context['sfs_allow_submit'] && (isset($_POST['sfs_submit']) || isset($_POST['sfs_submitban'])))
+		{
+			checkSession();
+			if (!$this->versionCheck('2.0', 'smf'))
+				validateToken($context['token_check'], 'post');
+
+			$data = [
+				'username' => $user_profile[$memID]['real_name'],
+				'email' => $user_profile[$memID]['email_address'],
+				'ip_addr' => $user_profile[$memID]['member_ip'],
+				'api_key' => $modSettings['sfs_apikey']
+			];
+			$post_data = http_build_query($data, '', '&');
+
+			// SMF 2.0 has the fetch_web_data in the Subs-Packages, 2.1 it is in Subs.php.
+			if ($this->versionCheck('2.0', 'smf'))
+				require_once($sourcedir . '/Subs-Package.php');
+
+			// Now we have a URL, lets go get it.
+			$result = fetch_web_data('https://www.stopforumspam.com/add', $post_data);
+
+			if (strpos($result, 'data submitted successfully') === false)
+				$context['submission_failed'] = $this->txt('sfs_submission_error');
+			else if (isset($_POST['sfs_submitban']))
+				redirectexit($scripturl . '?action=admin;area=ban;sa=add;u=' . $memID);
+			else
+				$context['submission_success'] = $this->txt('sfs_submission_success');
+		}
+	
+		// CHeck if we have this info.
+		if (($cache = cache_get_data($cache_key)) === null || ($response = $smcFunc['json_decode']($cache, true)) === null)
+		{
+			$checks = [
+				['username' => $user_profile[$memID]['real_name']],
+				['email' => $user_profile[$memID]['email_address']],
+				['ip' => $user_profile[$memID]['member_ip']],
+				['ip' => $user_profile[$memID]['member_ip2']],
+			];
+
+			$requestURL = $this->buildServerURL();
+			$this->buildCheckPath($requestURL, $checks, 'profile');
+			$response = (array) $this->sendSFSCheck($requestURL, $checks, 'profile');
+		
+			cache_put_data($cache_key, $smcFunc['json_encode']($response), 600);
+		}
+
+		// Prepare for the template.
+		$context['sfs_overall'] = (bool) $response['success'];
+		$context['sfs_checks'] = $response;
+		unset($context['sfs_checks']['success']);
+
+		if ($context['sfs_allow_submit'])
+		{
+			$context['sfs_submit_url'] = $scripturl . '?action=profile;area=sfs;u=' . $memID;
+			if (!$this->versionCheck('2.0', 'smf'))
+				createToken($context['token_check'], 'post');
+		}
+
+		loadTemplate('StopForumSpam');
+		$context['sub_template'] = 'profile_tracksfs';
+	}
+
+	/**
 	 * Test for a standard post.
 	 *
 	 * @internal
