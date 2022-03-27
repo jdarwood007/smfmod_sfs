@@ -221,12 +221,23 @@ class SFS
 		$profile_areas['info']['areas']['sfs'] = [
 			'label' => $this->txt('sfs_profile'),
 			'file' => 'SFS.php',
+			'icon' => 'sfs.webp',
 			'function' => 'SFS::ProfileTrackSFS',
 			'permission' => [
 				'own' => ['moderate_forum'],
 				'any' => ['moderate_forum'],
 			],
 		];
+
+		// SMF 2.0 can't call objects or classes.
+		if ($this->versionCheck('2.0', 'smf'))
+		{
+			function ProfileTrackSFS20(int $memID)
+			{
+				return SFS::ProfileTrackSFS($memID);
+			}
+			$profile_areas['info']['areas']['sfs']['function'] = 'ProfileTrackSFS20';
+		}
 	}
 
 	/**
@@ -259,7 +270,7 @@ class SFS
 	 */
 	public function TrackSFS(int $memID): void
 	{
-		global $user_profile, $context, $smcFunc, $scripturl, $modSettings;
+		global $user_profile, $context, $smcFunc, $scripturl, $modSettings, $sourcedir;
 
 		isAllowedTo('moderate_forum');
 
@@ -299,7 +310,7 @@ class SFS
 		}
 	
 		// CHeck if we have this info.
-		if (($cache = cache_get_data($cache_key)) === null || ($response = $smcFunc['json_decode']($cache, true)) === null)
+		if (($cache = cache_get_data($cache_key)) === null || ($response = $this->decodeJSON($cache, true)) === null)
 		{
 			$checks = [
 				['username' => $user_profile[$memID]['real_name']],
@@ -312,7 +323,7 @@ class SFS
 			$this->buildCheckPath($requestURL, $checks, 'profile');
 			$response = (array) $this->sendSFSCheck($requestURL, $checks, 'profile');
 		
-			cache_put_data($cache_key, $smcFunc['json_encode']($response), 600);
+			cache_put_data($cache_key, $this->encodeJSON($response), 600);
 		}
 
 		// Prepare for the template.
@@ -325,6 +336,8 @@ class SFS
 			$context['sfs_submit_url'] = $scripturl . '?action=profile;area=sfs;u=' . $memID;
 			if (!$this->versionCheck('2.0', 'smf'))
 				createToken($context['token_check'], 'post');
+			else
+				unset($context['token_check']);
 		}
 
 		loadTemplate('StopForumSpam');
@@ -750,7 +763,7 @@ class SFS
 				$type == 'email' ? $check['value'] : '',
 				$type == 'ip' ? $check['value'] : $user_info['ip'],
 				$user_info['ip2'],
-				json_encode($check),
+				$this->encodeJSON($check),
 				'Blocked'
 				),
 			array('id_sfs', 'id_type')
@@ -835,6 +848,38 @@ class SFS
 			// We got a error, return nothing.  Don't log this, not worth it.
 			if (json_last_error() !== JSON_ERROR_NONE)
 				return array();
+			return $data;
+		}
+	}
+
+	/**
+	 * json JSON data and return it.
+	 * If we have $smcFunc['json_encode'], we use this as it handles errors natively.
+	 * For all others, we simply ensure a proper array is returned in the event of a error.
+	 *
+	 * @param array $requestData A properly formatted json string.
+	 *
+	 * @internal
+	 * @CalledIn SMF 2.0, SMF 2.1
+	 * @version 1.1
+	 * @since 1.1
+	 * @return string The stringified array.
+	 */
+	public function encodeJSON(array $requestData): string
+	{
+		global $smcFunc;
+
+		// Do we have $smcFunc?  It handles errors and logs them as needed.
+		if (isset($smcFunc['json_encode']) && is_callable($smcFunc['json_encode']))
+			return $smcFunc['json_encode']($requestData);
+		// Back to the basics.
+		else
+		{
+			$data = @json_encode($requestData);
+
+			// We got a error, return nothing.  Don't log this, not worth it.
+			if (json_last_error() !== JSON_ERROR_NONE)
+				return null;
 			return $data;
 		}
 	}

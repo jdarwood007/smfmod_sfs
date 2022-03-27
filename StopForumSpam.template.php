@@ -97,7 +97,7 @@ function template_profile_tracksfs()
 
 		if (!empty($context['token_check']))
 			echo '
-		<input type="hidden" name="' . $context[$context['token_check'] . '_token_var'] . '" value="' . $context[$context['token_check'] . '_token'] . '">
+		<input type="hidden" name="' . $context[$context['token_check'] . '_token_var'] . '" value="' . $context[$context['token_check'] . '_token'] . '">';
 
 		echo '
 	</form>';

@@ -78,7 +78,7 @@
 			<hook hook="integrate_manage_logs" function="SFSA::hook_manage_logs" />
 
 			<!-- Profile Section -->
-			<hook hook="integrate_pre_profile_areas" function="SFSA::hook_pre_profile_areas" />
+			<hook hook="integrate_pre_profile_areas" function="SFS::hook_pre_profile_areas" />
 
 		<redirect url="?action=admin;area=modsettings;sa=sfs" />
 	</install>
@@ -101,7 +101,7 @@
 			<hook hook="integrate_manage_logs" function="SFSA::hook_manage_logs" reverse="true" />
 
 			<!-- Profile Section -->
-			<hook hook="integrate_pre_profile_areas" function="SFSA::hook_pre_profile_areas" reverse="true" />
+			<hook hook="integrate_pre_profile_areas" function="SFS::hook_pre_profile_areas" reverse="true" />
 
 		<!-- language files, removed -->
 		<remove-file name="$themes_dir/default/languages/StopForumSpam.english.php" />
@@ -119,7 +119,7 @@
 		<require-file name="StopForumSpam.template.php" destination="$themedir" />
 		<require-file name="SFS.php" destination="$sourcedir" />
 		<require-file name="SFS-Subs-Admin.php" destination="$sourcedir" />
-		<hook hook="integrate_pre_profile_areas" function="SFSA::hook_pre_profile_areas" />
+		<hook hook="integrate_pre_profile_areas" function="SFS::hook_pre_profile_areas" />
 
 		<!-- this dir may not exist in SMF -->
 		<create-dir name="admin" destination="$themedir/images" />
