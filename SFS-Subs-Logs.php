@@ -690,7 +690,7 @@ class SFSL
 			'type' => $this->SFSclass->txt('sfs_log_types_' . $row['id_type']),
 			'time' => timeformat($row['log_time']),
 			'url' => preg_replace('~http(s)?://~i', 'hxxp\\1://', $row['url']),
-			'timestamp' => forum_time(true, $row['log_time']),
+			'timestamp' => $row['log_time'],
 			'member_link' => $row['id_member'] ? '<a href="' . $scripturl . '?action=profile;u=' . $row['id_member'] . '">' . $row['real_name'] . '</a>' : (empty($row['real_name']) ? ($this->SFSclass->txt('guest') . (!empty($row['extra']['member_acted']) ? ' (' . $row['extra']['member_acted'] . ')' : '')) : $row['real_name']),
 			'username' => $row['username'],
 			'email' => $row['email'],
