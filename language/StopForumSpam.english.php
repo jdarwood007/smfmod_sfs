@@ -12,7 +12,7 @@ $txt['sfs_enabled'] = 'Enable Stop Forum Spam?';
 $txt['sfs_expire'] = 'Limit results to entries in the past x days';
 $txt['sfs_log_debug'] = 'Enable Logging of all SFS requests (Debugging Only)?';
 $txt['sfs_ipcheck'] = 'Check IP Address?';
-$txt['sfs_ipcheck_autoban'] = 'Automatically ban IPs that are blacklisted?';
+$txt['sfs_ipcheck_autoban'] = 'Automatically ban IPs that are blocked?';
 $txt['sfs_usernamecheck'] = 'Check Username?';
 $txt['sfs_username_confidence'] = 'Confidence level for usernames on registration';
 $txt['sfs_emailcheck'] = 'Check Email? (Recommended)';
@@ -38,7 +38,7 @@ $txt['sfs_tor_check_bad'] = 'Block Only Known Bad Exit Nodes';
 
 /* Admin Section: Verification Options header */
 $txt['sfs_verification_title'] = 'Verification Options';
-$txt['sfs_verification_desc'] = 'Usage of these options reuqire Anti-Spam Verification options to be setup and configurred.  Disabling verification options or not requiring it in specific sections will override these options.';
+$txt['sfs_verification_desc'] = 'These options require Anti-Spam Verification options to be setup and configured.  Disabling verification options or not requiring them in specific sections will override these options.';
 
 /* Admin Section: Verification Options for guests */
 $txt['sfs_verification_options'] = 'Guest Verification Sections';
@@ -47,7 +47,7 @@ $txt['sfs_verification_options_post'] = 'Posting';
 $txt['sfs_verification_options_report'] = 'Reporting Topics';
 $txt['sfs_verification_options_search'] = 'Search (Not Recommended)';
 $txt['sfs_verification_options_extra'] = 'Extra sections';
-$txt['sfs_verification_options_extra_subtext'] = 'Used for other mods or areas that add additional sections using custom verification names.  Use comma separted values. Use % for wildcards';
+$txt['sfs_verification_options_extra_subtext'] = 'Used for other mods or areas that add additional sections using custom verification names.  Use comma-separated values. Use % for wildcards';
 
 $txt['sfs_verification_options_members'] = 'Member Verification Sections';
 $txt['sfs_verification_options_members_post_threshold'] = 'Post Count after which we stop these checks.';
@@ -58,7 +58,7 @@ $txt['sfs_request_failure'] = 'SFS Failed with invalid response';
 $txt['sfs_request_failure_nodata'] = 'SFS Failed as no data was sent';
 
 /* Spammer detection */
-$txt['sfs_request_blocked'] = 'Your request was denied as one or more emails, usernames, or IPs where found on the Stop Forum Spam blacklist';
+$txt['sfs_request_blocked'] = 'Your request was denied as your email, username and/or IP address is listed in the Stop Forum Spam database';
 
 /* Admin Section Logs */
 $txt['sfs_log_no_entries_found'] = 'No Entries found in the SFS logs';
@@ -89,8 +89,8 @@ $txt['sfs_log_confidence'] = 'Confidence Level: %1$s';
 
 // The ban group info.
 $txt['sfs_ban_group_name'] = 'SFS Automatic IP Bans';
-$txt['sfs_ban_group_reason'] = 'Your IP has triggered the automatic ban for poor reputation and has been blacklisted';
-$txt['sfs_ban_group_notes'] = 'This Group is automatically created by the Stop Forum Spam Customization and automatically will add IPs that are blacklisted to this group';
+$txt['sfs_ban_group_reason'] = 'Your IP address has triggered an automatic ban for poor reputation and has been blocked';
+$txt['sfs_ban_group_notes'] = 'This Group is automatically created by the Stop Forum Spam Customization, and blocked IPs will be automatically added to this group';
 
 // Profile menu
 $txt['sfs_profile'] = 'Track Stop Forum Spam';
