@@ -49,8 +49,8 @@ $txt['sfs_verification_options_search'] = 'Search (Not Recommended)';
 $txt['sfs_verification_options_extra'] = 'Extra sections';
 $txt['sfs_verification_options_extra_subtext'] = 'Used for other mods or areas that add additional sections using custom verification names.  Use comma separted values. Use % for wildcards';
 
-$txt['sfs_verification_options_members'] = 'Member Verification Sections';
-$txt['sfs_verification_options_members_post_threshold'] = 'Post Count after which we stop these checks.';
+$txt['sfs_verOptionsMemExtra'] = 'Member Verification Sections';
+$txt['sfs_verfOptMemPostThreshold'] = 'Post Count after which we stop these checks.';
 $txt['sfs_verification_options_membersextra'] = 'Extra sections';
 
 /* Request handling */
