@@ -3,7 +3,7 @@
 <package-info xmlns="http://www.simplemachines.org/xml/package-info" xmlns:smf="http://www.simplemachines.org/">
 	<id>SleePy:StopForumSpam</id>
 	<name>Stop Forum Spam</name>
-	<version>1.1</version>
+	<version>1.2</version>
 	<type>modification</type>
 
 	<install for="1.1.*">
