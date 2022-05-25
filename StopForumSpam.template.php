@@ -37,28 +37,34 @@ function template_profile_tracksfs()
 			echo '
 					<tr class="windowbg">
 						<td title="sfs_check_', $id_check, '">
-							', $txt['sfs_check_' . $id_check], '
+							', $txt['sfs_check_' . $id_check];
+
+			// Show the IP we tested.
+			if ($id_check === 'ip')
+				echo ' <span class="smalltext">(', $check['value'], ')</span>';
+
+			echo '
 						</td>
 						<td class="smalltext">
-							', (!empty($check->appears) ? $txt['yes'] : $txt['no']);
+							', (!empty($check['appears']) ? $txt['yes'] : $txt['no']);
 
 			// Some checks will show the last seen, convert it and show it.
-			if (!empty($check->lastseen))
-				echo '<br>' . $txt['sfs_last_seen'] . ': ' . timeformat(strtotime($check->lastseen));
+			if (!empty($check['lastseen']))
+				echo '<br>' . $txt['sfs_last_seen'] . ': ' . timeformat(strtotime($check['lastseen']));
 
-			if (!empty($check->confidence))
-				echo '<br>' . $txt['sfs_confidence'] . ': ' . $check->confidence;
+			if (!empty($check['confidence']))
+				echo '<br>' . $txt['sfs_confidence'] . ': ' . $check['confidence'];
 
-			if (!empty($check->frequency))
-				echo '<br>' . $txt['sfs_frequency'] . ': ' . $check->frequency;
+			if (!empty($check['frequency']))
+				echo '<br>' . $txt['sfs_frequency'] . ': ' . $check['frequency'];
 
 			// IP address may be normalized
-			if (!empty($check->torexit))
+			if (!empty($check['torexit']))
 				echo '<br>' . $txt['sfs_torexit'];
 
 			// IP address may be normalized
-			if (!empty($check->normalized) && !empty($check->asn))
-				echo '<br><a href="', $scripturl, '?action=profile;area=tracking;sa=ip;searchip=' . urlencode($check->normalized) . '">', $txt['trackIP'], '</a>';
+			if (!empty($check['asn']))
+				echo '<br><a href="', $scripturl, '?action=profile;area=tracking;sa=ip;searchip=' . urlencode(str_replace('::*', ':*', !empty($check['normalized']) ? $check['normalized'] . '*' : $check['value'])) . '">', $txt['trackIP'], ' ',  (!empty($check['normalized']) ? $check['normalized'] . '*' : $check['value']), '</a>';
 
 			echo '
 						</td>
