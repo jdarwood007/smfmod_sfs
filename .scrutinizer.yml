@@ -181,7 +181,7 @@ build:
                     - php-scrutinizer-run
             dependencies:
                 after:
-                    - git clone https://github.com/SimpleMachines/SMF2.1 smf
+                    - git clone -b release-2.1 https://github.com/SimpleMachines/SMF smf
 
 filter:
     dependency_paths:

@@ -685,6 +685,8 @@ class SFSL
 	 */
 	public function getSFSLogPrepareEntry(array $row = array()): array
 	{
+		global $scripturl;
+
 		$return = array(
 			'id' => $row['id_sfs'],
 			'type' => $this->SFSclass->txt('sfs_log_types_' . $row['id_type']),
