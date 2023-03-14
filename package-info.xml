@@ -6,10 +6,6 @@
 	<version>1.3</version>
 	<type>modification</type>
 
-	<install for="1.1.*">
-		<readme lang="english" parsebbc="true" type="inline">This mod is [b]not compatible[/b] with your version of SMF, it requires 2.0 or later.</readme>
-	</install>
-
 	<!-- 2.0 has no support for hooks -->
 	<install for="2.0.*">
 		<readme type="file" parsebbc="true">README.bbc</readme>
@@ -28,6 +24,7 @@
 
 		<!-- language files -->
 		<require-file name="language/StopForumSpam.english.php" destination="$themes_dir/default/languages" />
+		<require-file name="language/StopForumSpam.finnish.php" destination="$themes_dir/default/languages" />
 
 		<redirect url="?action=admin;area=modsettings;sa=sfs" />
 	</install>
@@ -41,6 +38,7 @@
 
 		<!-- language files, removed -->
 		<remove-dir name="$themes_dir/default/languages/StopForumSpam.english.php" />
+		<remove-dir name="$themes_dir/default/languages/StopForumSpam.finnish.php" />
 
 		<!-- source files, removed -->
 		<remove-file name="$sourcedir/SFS.php" />
@@ -58,7 +56,9 @@
 		<require-file name="SFS-Subs-Admin.php" destination="$sourcedir" />
 		<require-file name="SFS-Subs-Logs.php" destination="$sourcedir" />
 		<require-file name="StopForumSpam.template.php" destination="$themedir" />
+
 		<require-file name="language/StopForumSpam.english.php" destination="$themes_dir/default/languages" />
+		<require-file name="language/StopForumSpam.finnish.php" destination="$themes_dir/default/languages" />
 
 		<!-- this dir may not exist in SMF -->
 		<create-dir name="admin" destination="$themedir/images" />
@@ -105,6 +105,7 @@
 
 		<!-- language files, removed -->
 		<remove-file name="$themes_dir/default/languages/StopForumSpam.english.php" />
+		<remove-file name="$themes_dir/default/languages/StopForumSpam.finnish.php" />
 
 		<!-- source files, removed -->
 		<remove-file name="$sourcedir/SFS.php" />
@@ -116,15 +117,17 @@
 
 	<upgrade from="1.*" for="2.1.*">
 		<require-file name="language/StopForumSpam.english.php" destination="$themes_dir/default/languages" />
+		<require-file name="language/StopForumSpam.finnish.php" destination="$themes_dir/default/languages" />
 		<require-file name="StopForumSpam.template.php" destination="$themedir" />
 		<require-file name="SFS.php" destination="$sourcedir" />
 		<require-file name="SFS-Subs-Admin.php" destination="$sourcedir" />
+		<require-file name="SFS-Subs-Logs.php" destination="$sourcedir" />
 		<hook hook="integrate_pre_profile_areas" function="SFS::hook_pre_profile_areas" />
 
 		<!-- this dir may not exist in SMF -->
 		<create-dir name="admin" destination="$themedir/images" />
 		<require-file name="sfs.webp" destination="$themedir/images/admin" />
-	</upgrade>	
+	</upgrade>
 
 	<upgrade from="1.*" for="2.0.*">
 		<code type="file">sfs_hooks_install.php</code>
@@ -136,5 +139,5 @@
 		<!-- this dir may not exist in SMF -->
 		<create-dir name="admin" destination="$themedir/images" />
 		<require-file name="sfs.webp" destination="$themedir/images/admin" />
-	</upgrade>	
+	</upgrade>
 </package-info>

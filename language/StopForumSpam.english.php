@@ -19,6 +19,13 @@ $txt['sfs_emailcheck'] = 'Check Email? (Recommended)';
 $txt['sfs_enablesubmission'] = 'Enable Submissions';
 $txt['sfs_apikey'] = '<a href="https://www.stopforumspam.com/keys">API Key</a>';
 
+/* Admin section: Required */
+$txt['sfs_required'] = 'Checks Required';
+$txt['sfs_required_any'] = 'Any [Email or Username | IP] (Default)';
+$txt['sfs_required_email_ip'] = 'Email & IP Address';
+$txt['sfs_required_email_username'] = 'Email & Username';
+$txt['sfs_required_username_ip'] = 'Username & IP Address';
+
 /* Admin section: Region Config */
 $txt['sfs_region'] = 'Geographic Access Region';
 $txt['sfs_region_global'] = 'Global (Recommended)';

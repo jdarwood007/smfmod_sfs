@@ -512,10 +512,31 @@ class SFS
 			'email' => !empty($modSettings['sfs_emailcheck']) && !empty($response['email'])
 		);
 
-		// Run all the checks, if we should.
-		foreach ($checkMap as $key => $checkEnabled)
-			if (empty($requestBlocked) && $checkEnabled)
-				$requestBlocked = call_user_func(array($this, 'sfsCheck_' . $key), $response[$key], $area);
+		// Are we requiring multiple checks.
+		if (!empty($modSettings['sfs_required']) && $modSettings['sfs_required'] != 'any')
+		{
+			// When requiring multiple checks, we require all to match.
+			$requiredChecks = explode('|', $modSettings['sfs_required']);
+			$result = true;
+			$test = '';
+			foreach ($requiredChecks as $key)
+			{
+				$test = call_user_func(array($this, 'sfsCheck_' . $key), $response[$key], $area);
+				$requestBlocked .= !empty($test) ? $test . '|' : '';
+				$result &= !empty($test);
+			}
+
+			// Not all checks passed, so we will allow it.
+			if (!$result)
+				$requestBlocked = '';			
+		}
+		// Otherwise we will check anything enabled and if any match, its found
+		else
+		{
+			foreach ($checkMap as $key => $checkEnabled)
+				if (empty($requestBlocked) && $checkEnabled)
+					$requestBlocked = call_user_func(array($this, 'sfsCheck_' . $key), $response[$key], $area);
+		}
 
 		// Log all the stats?  Debug mode here.
 		$this->logAllStats('all', $checks, $requestBlocked);
