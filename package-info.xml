@@ -81,6 +81,10 @@
 			<!-- Profile Section -->
 			<hook hook="integrate_pre_profile_areas" function="SFS::hook_pre_profile_areas" />
 
+			<!-- Display Section -->
+			<hook hook="integrate_prepare_display_context" function="SFS::hook_prepare_display_context" />
+			<hook hook="integrate_mod_buttons" function="SFS::hook_mod_buttons" />
+
 		<redirect url="?action=admin;area=modsettings;sa=sfs" />
 	</install>
 
@@ -105,6 +109,10 @@
 			<!-- Profile Section -->
 			<hook hook="integrate_pre_profile_areas" function="SFS::hook_pre_profile_areas" reverse="true" />
 
+			<!-- Display Section -->
+			<hook hook="integrate_prepare_display_context" function="SFS::hook_prepare_display_context" reverse="true" />
+			<hook hook="integrate_mod_buttons" function="SFS::hook_mod_buttons" reverse="true" />
+
 		<!-- language files, removed -->
 		<remove-file name="$themes_dir/default/languages/StopForumSpam.english.php" />
 		<remove-file name="$themes_dir/default/languages/StopForumSpam.finnish.php" />
@@ -125,6 +133,8 @@
 		<require-file name="SFS-Subs-Admin.php" destination="$sourcedir" />
 		<require-file name="SFS-Subs-Logs.php" destination="$sourcedir" />
 		<hook hook="integrate_pre_profile_areas" function="SFS::hook_pre_profile_areas" />
+		<hook hook="integrate_prepare_display_context" function="SFS::hook_prepare_display_context" />
+		<hook hook="integrate_mod_buttons" function="SFS::hook_mod_buttons" />
 
 		<!-- this dir may not exist in SMF -->
 		<create-dir name="admin" destination="$themedir/images" />

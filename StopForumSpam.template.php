@@ -85,7 +85,7 @@ function template_profile_tracksfs()
 				</div>
 				<div class="roundframe">
 					<div>', $txt['sfs_evidence'], '</div>
-					<textarea name="reason" rows="4"></textarea>
+					<textarea name="reason" rows="4" cols="60">', $context['reason'], '</textarea>
 					<div class="righttext">
 						<input id="notify_submit" type="submit" name="sfs_submit" value="', $txt['sfs_submit'], '" class="button">
 						<input id="notify_submit" type="submit" name="sfs_submitban" value="', $txt['sfs_submit_ban'], '" class="button">

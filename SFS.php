@@ -279,6 +279,40 @@ class SFS
 		$context['token_check'] = 'sfs_submit-' . $memID;
 		$cache_key = 'sfs_check_member-' . $memID;
 
+		// Do we have a message?
+		$poster_name = null;
+		$poster_email = null;
+		$poster_ip = null;
+		$post_body = null;
+		if (isset($_GET['msg']) && intval($_GET['msg']) > 0)
+		{
+			$request = $smcFunc['db_query']('', '
+				SELECT poster_name, poster_email, poster_ip, body
+				FROM {db_prefix}messages
+				WHERE id_msg = {int:id_msg}
+					AND (
+						id_member = {int:id_member}
+						OR id_member = 0
+					)
+					AND {query_see_message_board}
+				',
+				array(
+					'id_msg' => (int) $_GET['msg'],
+					'id_member' => $memID,
+					'actor_is_admin' => $context['user']['is_admin'] ? 1 : 0
+				));
+			if ($smcFunc['db_num_rows']($request) == 1)
+			{
+				list($poster_name, $poster_email, $poster_ip, $post_body) = $smcFunc['db_fetch_row']($request);
+				$poster_ip = inet_dtop($poster_ip);
+			}
+			$smcFunc['db_free_result']($request);
+			
+			$context['reason'] = $smcFunc['htmlspecialchars']($post_body);
+		}
+		else
+			$context['reason'] = '';
+
 		// Are we submitting this?
 		if ($context['sfs_allow_submit'] && (isset($_POST['sfs_submit']) || isset($_POST['sfs_submitban'])))
 		{
@@ -287,9 +321,9 @@ class SFS
 				validateToken($context['token_check'], 'post');
 
 			$data = [
-				'username' => $user_profile[$memID]['real_name'],
-				'email' => $user_profile[$memID]['email_address'],
-				'ip_addr' => $user_profile[$memID]['member_ip'],
+				'username' => !empty($poster_name) ? $poster_name : $user_profile[$memID]['real_name'],
+				'email' => !empty($poster_email) ? $poster_email : $user_profile[$memID]['email_address'],
+				'ip_addr' => !empty($poster_ip) ? $poster_ip : $user_profile[$memID]['member_ip'],
 				'api_key' => $modSettings['sfs_apikey']
 			];
 			$post_data = http_build_query($data, '', '&');
@@ -309,7 +343,7 @@ class SFS
 				$context['submission_success'] = $this->txt('sfs_submission_success');
 		}
 	
-		// CHeck if we have this info.
+		// Check if we have this info.
 		if (($cache = cache_get_data($cache_key)) === null || ($response = $this->decodeJSON($cache, true)) === null)
 		{
 			$checks = [
@@ -1500,5 +1534,48 @@ class SFS
 	{
 		if (in_array($variable, array('softwareName', 'softwareVersion')))
 			return $this->{$variable};
+	}
+
+	/**
+	 * The hook to setup quick buttons menu.
+	 *
+	 * @param array $profile_areas All the mod buttons.
+	 *
+	 * @api
+	 * @CalledIn SMF 2.1
+	 * @version 1.4.0
+	 * @since 1.4.0
+	 * @uses integrate_prepare_display_context - Hook SMF2.1
+	 * @return void We update the output to add the more action for SFS.
+	 */
+	public static function hook_prepare_display_context(&$output, &$message, $counter): void
+	{
+		global $smcFunc, $scripturl, $context;
+
+		$output['quickbuttons']['more']['sfs'] = array(
+			'label' => $smcFunc['classSFS']->txt('sfs_admin_area'),
+			'href' => $scripturl . '?action=profile;area=sfs;u=' . $output['member']['id'] . ';msg=' . $output['id'],
+			'icon' => 'sfs',
+			'show' => $context['can_moderate_forum']
+		);
+	}
+
+	/**
+	 * We don't do any mod buttons, just use this to inject some CSS.
+	 *
+	 * @param array $mod_buttons All the mod buttons.
+	 *
+	 * @api
+	 * @CalledIn SMF 2.1
+	 * @version 1.4.0
+	 * @since 1.4.0
+	 * @uses integrate_mod_buttons - Hook SMF2.1
+	 * @return void We add some css.
+	 */
+	public static function hook_mod_buttons(&$mod_buttons): void
+	{
+		global $settings;
+
+		addInlineCss('.main_icons.sfs::before { background: url(' . $settings['default_images_url'] . '/admin/sfs.webp) no-repeat; background-size: contain;}');
 	}
 }
