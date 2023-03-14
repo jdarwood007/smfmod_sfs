@@ -1284,9 +1284,9 @@ class SFSA
 		// Sending the data?
 		if ($context['test_sent'])
 		{
-			//checkSession();
-			//if (!$this->SFSclass->versionCheck('2.0', 'smf'))
-			//	validateToken($context['token_check'], 'post');
+			checkSession();
+			if (!$this->SFSclass->versionCheck('2.0', 'smf'))
+				validateToken($context['token_check'], 'post');
 
 			$username = $smcFunc['htmlspecialchars']($_POST['username']);
 			$email = $smcFunc['htmlspecialchars']($_POST['email']);
