@@ -1460,6 +1460,32 @@ class SFS
 	}
 
 	/**
+	 * The caller for a test check.
+	 *
+	 * @param array $checks The data we are checking.
+	 *
+	 * @api
+	 * @CalledIn SMF 2.0, SMF 2.1
+	 * @version 1.4.0
+	 * @since 1.4.0
+	 * @return array The results of the check.
+	 */
+	public function TestSFS(array $checks): array
+	{
+		$requestURL = $this->buildServerURL();
+
+		// Lets build our data set, always send it as a bulk.
+		$singleCheckFound = $this->buildCheckPath($requestURL, $checks, 'test');
+
+		// No checks found? Can't do this.
+		if (empty($singleCheckFound))
+			return [];
+
+		// Send this off.
+		return $this->sendSFSCheck($requestURL, $checks, 'test');
+	}
+
+	/**
 	 * Get some data
 	 *
 	 * @param string $variable The data we are looking for..

@@ -76,6 +76,7 @@
 			<hook hook="integrate_admin_areas" function="SFSA::hook_admin_areas" />
 			<hook hook="integrate_modify_modifications" function="SFSA::hook_modify_modifications" />
 			<hook hook="integrate_manage_logs" function="SFSA::hook_manage_logs" />
+			<hook hook="integrate_manage_registrations" function="SFSA::hook_manage_registrations" />
 
 			<!-- Profile Section -->
 			<hook hook="integrate_pre_profile_areas" function="SFS::hook_pre_profile_areas" />
@@ -99,6 +100,7 @@
 			<hook hook="integrate_admin_areas" function="SFSA::hook_admin_areas" reverse="true" />
 			<hook hook="integrate_modify_modifications" function="SFSA::hook_modify_modifications" reverse="true" />
 			<hook hook="integrate_manage_logs" function="SFSA::hook_manage_logs" reverse="true" />
+			<hook hook="integrate_manage_registrations" function="SFSA::hook_manage_registrations" reverse="true" />
 
 			<!-- Profile Section -->
 			<hook hook="integrate_pre_profile_areas" function="SFS::hook_pre_profile_areas" reverse="true" />

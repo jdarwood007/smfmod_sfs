@@ -24,6 +24,7 @@ class SFSA
 	 */
 	private $adminPageURL = null;
 	private $adminLogURL = null;
+	private $adminTestURL = null;
 
 	/**
 	 * @var mixed Search area handling.
@@ -109,7 +110,7 @@ class SFSA
 	 *
 	 * @internal
 	 * @CalledIn SMF 2.0, SMF 2.1
-	 * @version 1.0
+	 * @version 1.4.0
 	 * @since 1.0
 	 * @uses integrate__admin_areas - Hook SMF2.0
 	 * @uses integrate__admin_areas - Hook SMF2.1
@@ -124,6 +125,7 @@ class SFSA
 		{
 			$this->adminPageURL = $scripturl . '?action=admin;area=modsettings;sa=sfs';
 			$this->adminLogURL = $scripturl . '?action=admin;area=modsettings;sa=sfslog';
+			$this->adminTestURL = $scripturl . '?action=admin;area=modsettings;sa=sfstest';
 
 			$admin_areas['config']['areas']['modsettings']['subsections']['sfs'] = array(
 				$this->SFSclass->txt('sfs_admin_area')
@@ -131,17 +133,21 @@ class SFSA
 			$admin_areas['config']['areas']['modsettings']['subsections']['sfslog'] = array(
 				$this->SFSclass->txt('sfs_admin_logs')
 			);
+			$admin_areas['config']['areas']['modsettings']['subsections']['sfstest'] = array(
+				$this->SFSclass->txt('sfs_admin_test')
+			);
 		}
 		else
 		{
 			$this->adminPageURL = $scripturl . '?action=admin;area=modsettings;sa=sfs';
 			$this->adminLogURL = $scripturl . '?action=admin;area=logs;sa=sfslog';
+			$this->adminTestURL = $scripturl . '?action=admin;area=regcenter;sa=sfstest';
 
 			$admin_areas['config']['areas']['modsettings']['subsections']['sfs'] = array(
 				$this->SFSclass->txt('sfs_admin_area')
 			);
-			$admin_areas['maintenance']['areas']['logs']['subsections']['sfslog'] = array(
-				$this->SFSclass->txt('sfs_admin_logs')
+			$admin_areas['members']['areas']['regcenter']['subsections']['sfstest'] = array(
+				$this->SFSclass->txt('sfs_admin_test')
 			);
 		}
 	}
@@ -174,7 +180,7 @@ class SFSA
 	 *
 	 * @internal
 	 * @CalledIn SMF 2.0, SMF 2.1
-	 * @version 1.0
+	 * @version 1.4.0
 	 * @since 1.0
 	 * @uses integrate_modify_modifications - Hook SMF2.0
 	 * @uses integrate_modify_modifications - Hook SMF2.1
@@ -186,7 +192,10 @@ class SFSA
 
 		// Only in SMF 2.0 do we drop logs here.
 		if ($this->SFSclass->versionCheck('2.0', 'smf'))
+		{
 			$subActions['sfslog'] = 'SFSA::startupLogs';
+			$subActions['sfstest'] = 'SFSA::startupTest';
+		}
 	}
 
 	/**
@@ -215,7 +224,7 @@ class SFSA
 	 *
 	 * @internal
 	 * @CalledIn SMF 2.0, SMF 2.1
-	 * @version 1.0
+	 * @version 1.4.0
 	 * @since 1.0
 	 * @uses integrate_modify_modifications - Hook SMF2.0
 	 * @uses integrate_modify_modifications - Hook SMF2.1
@@ -323,7 +332,7 @@ class SFSA
 	public static function hook_manage_logs(array &$log_functions): bool
 	{
 		// Add our logs sub action.
-		$log_functions['sfslog'] = array('SFS-Subs-Logs.php', 'SFSL::startupLogs');
+        $log_functions['sfslog'] = array('SFS-Subs-Logs.php', 'SFSL::startupLogs');
 
 		return self::selfClass()->AddToLogMenu($log_functions);
 	}
@@ -1150,5 +1159,164 @@ class SFSA
 			return isset($_REQUEST['search_type']) && isset($this->search_types[$_REQUEST['search_type']]) ? $_REQUEST['search_type'] : (isset($this->search_types[$context['order']]) ? $context['order'] : 'member');
 		else
 			return $this->search_params['type'];
+	}
+
+	/**
+	 * In some software/versions, we can hook into the members registration center section.
+	 * In others we hook into the modifications settings.
+	 *
+	 * @param array $subActions All possible sub actions.
+	 *
+	 * @api
+	 * @CalledIn SMF 2.1
+	 * @See SFSA::startupTest
+	 * @version 1.4.0
+	 * @since 1.4.0
+	 * @uses integrate_manage_registrations - Hook SMF2.1
+	 * @return void No return is generated
+	 */
+	public static function hook_manage_registrations(array &$subActions): bool
+	{
+		global $context;
+
+		// Add our logs sub action.
+		$subActions['sfstest'] = array('SFSA::startupTest', 'admin_forum');
+
+		if (isset($_REQUEST['sa']) && $_REQUEST['sa'] == 'sfstest' && allowedTo('admin_forum'))
+			$context['sub_action'] = 'sfstest';
+
+		return self::selfClass()->AddToRegCenterMenu($subActions);
+	}
+
+	/**
+	 * Add the SFS Test to the regcenter menu.
+	 *
+	 * @param array $log_functions All possible log functions.
+	 *
+	 * @CalledIn SMF 2.1
+	 * @See SFSA::startupTest
+	 * @version 1.4.0
+	 * @since 1.4.0
+	 * @return void No return is generated
+	 */
+	public function AddToRegCenterMenu(array &$subActions): bool
+	{
+		global $context;
+
+		$context[$context['admin_menu_name']]['tab_data']['tabs']['sfstest'] = array(
+			'description' => $this->SFSclass->txt('sfs_admin_test_desc'),
+		);
+
+		return true;
+	}
+
+	/**
+	 * Test API startup caller.
+	 * This has a $return_config just for simply complying with properly for searching the admin panel.
+	 *
+	 * @param bool $return_config If true, returns empty array to prevent breaking old SMF installs.
+	 *
+	 * @api
+	 * @CalledIn SMF 2.1
+	 * @See SFSA::loadTestAPI
+	 * @version 1.4.0
+	 * @since 1.4.0
+	 * @uses hook_manage_registrations - Hook SMF2.1
+	 * @uses setupModifyModifications - Injected SMF2.0
+	 * @return void No return is generated
+	 */
+	public static function startupTest(bool $return_config = false): array
+	{
+		return self::selfClass()->loadTestAPI();
+	}
+
+	/**
+	 * Actually do the test API.
+	 * This has a $return_config just for simply complying with properly for searching the admin panel.
+	 *
+	 * @param bool $return_config If true, returns empty array to prevent breaking old SMF installs.
+	 *
+	 * @api
+	 * @CalledIn SMF2.0, SMF 2.1
+	 * @version 1.4.0
+	 * @since 1.4.0
+	 * @uses hook_manage_registrations - Hook SMF2.1
+	 * @uses setupModifyModifications - Injected SMF2.0
+	 * @return void No return is generated
+	 */
+	public function loadTestAPI(bool $return_config = false): array
+	{
+		global $context, $smcFunc, $user_info;
+
+		// No Configs.
+		if ($return_config)
+			return array();
+
+		$context['token_check'] = 'sfs_testapi';
+		$this->SFSclass->loadLanguage();
+
+		// The reuslts output.
+		$context['test_sent'] = isset($_POST['send']);
+		$context['sfs_checks'] = array(
+			'username' => array(
+				0 => array(
+					'enabled' => !empty($modSettings['sfs_usernamecheck']),
+					'value' => !empty($_POST['username']) ? $smcFunc['htmlspecialchars']($_POST['username']) : $user_info['name'],
+					'results' => null
+				),
+			),
+			'email' => array(
+				0 => array(
+					'enabled' => !empty($modSettings['sfs_emailcheck']),
+					'value' => !empty($_POST['email']) ? $smcFunc['htmlspecialchars']($_POST['email']) : $user_info['email'],
+					'results' => null
+				),
+			),
+			'ip' => array(
+				0 => array(
+					'enabled' => !empty($modSettings['sfs_ipcheck']),
+					'value' => !empty($_POST['ip']) ? $smcFunc['htmlspecialchars']($_POST['ip']) : $user_info['ip'],
+					'results' => null
+				),
+			),
+		);
+
+		// Sending the data?
+		if ($context['test_sent'])
+		{
+			//checkSession();
+			//if (!$this->SFSclass->versionCheck('2.0', 'smf'))
+			//	validateToken($context['token_check'], 'post');
+
+			$username = $smcFunc['htmlspecialchars']($_POST['username']);
+			$email = $smcFunc['htmlspecialchars']($_POST['email']);
+			$ip = $smcFunc['htmlspecialchars']($_POST['ip']);
+				
+			$response = $this->SFSclass->TestSFS(array(
+					array('username' => $username),
+					array('email' => $email),
+					array('ip' => $ip),
+			));
+
+			// No checks found? Can't do this.
+			if (empty($response) || !is_array($response) || empty($response['success']))
+				$context['test_api_error'] = $this->SFSclass->txt('sfs_request_failure_nodata');
+			else
+				// Parse all the responses out.
+				foreach($context['sfs_checks'] as $key => &$res)
+					$res[0] += $response[$key][0];
+		}
+
+		// Load our template.
+		loadTemplate('StopForumSpam');
+		$context['sub_template'] = 'sfsa_testapi';
+
+		$context['sfs_test_url'] = $this->adminTestURL;
+		if (!$this->SFSclass->versionCheck('2.0', 'smf'))
+			createToken($context['token_check'], 'post');
+		else
+			unset($context['token_check']);
+
+		return array();
 	}
 }
