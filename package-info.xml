@@ -3,7 +3,7 @@
 <package-info xmlns="http://www.simplemachines.org/xml/package-info" xmlns:smf="http://www.simplemachines.org/">
 	<id>SleePy:StopForumSpam</id>
 	<name>Stop Forum Spam</name>
-	<version>1.3</version>
+	<version>1.4</version>
 	<type>modification</type>
 
 	<!-- 2.0 has no support for hooks -->
@@ -125,13 +125,13 @@
 		<remove-file name="$themedir/images/admin/sfs.webp" />
 	</uninstall>
 
-	<upgrade from="1.*" for="2.1.*">
+	<upgrade from="1.0-1.3" for="2.1.*">
 		<require-file name="language/StopForumSpam.english.php" destination="$themes_dir/default/languages" />
-		<require-file name="language/StopForumSpam.finnish.php" destination="$themes_dir/default/languages" />
+        <require-file name="language/StopForumSpam.finnish.php" destination="$themes_dir/default/languages" />
 		<require-file name="StopForumSpam.template.php" destination="$themedir" />
 		<require-file name="SFS.php" destination="$sourcedir" />
 		<require-file name="SFS-Subs-Admin.php" destination="$sourcedir" />
-		<require-file name="SFS-Subs-Logs.php" destination="$sourcedir" />
+        <require-file name="SFS-Subs-Logs.php" destination="$sourcedir" />
 		<hook hook="integrate_pre_profile_areas" function="SFS::hook_pre_profile_areas" />
 		<hook hook="integrate_prepare_display_context" function="SFS::hook_prepare_display_context" />
 		<hook hook="integrate_mod_buttons" function="SFS::hook_mod_buttons" />
@@ -141,12 +141,14 @@
 		<require-file name="sfs.webp" destination="$themedir/images/admin" />
 	</upgrade>
 
-	<upgrade from="1.*" for="2.0.*">
+	<upgrade from="1.0-1.3" for="2.0.*">
 		<code type="file">sfs_hooks_install.php</code>
 		<require-file name="language/StopForumSpam.english.php" destination="$themes_dir/default/languages" />
+        <require-file name="language/StopForumSpam.finnish.php" destination="$themes_dir/default/languages" />
 		<require-file name="StopForumSpam.template.php" destination="$themedir" />
 		<require-file name="SFS.php" destination="$sourcedir" />
 		<require-file name="SFS-Subs-Admin.php" destination="$sourcedir" />
+        <require-file name="SFS-Subs-Logs.php" destination="$sourcedir" />
 
 		<!-- this dir may not exist in SMF -->
 		<create-dir name="admin" destination="$themedir/images" />
