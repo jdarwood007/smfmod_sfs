@@ -761,16 +761,26 @@ class SFSL
 		// This tells us what it matched on exactly.
 		if (strpos($row['result'], ',') !== false)
 		{
-			list($resultType, $resultMatch, $extra) = explode(',', $row['result'] . ',,,');
-			$result = sprintf($this->SFSclass->txt('sfs_log_matched_on'), $resultType, $resultMatch);
+			$results = array();
+			$multiMatch = explode('|', $row['result'] . '|');
+			foreach ($multiMatch as $match)
+			{
+				if (empty($match))
+					continue;
 
-			// If this was a IP ban, note it.
-			if ($resultType == 'ip' && !empty($extra))
-				$result .= ' ' . $this->SFSclass->txt('sfs_log_auto_banned');
-			if ($resultType == 'username' && !empty($extra))
-				$result .= ' ' . sprintf($this->SFSclass->txt('sfs_log_confidence'), $extra);
+				list($resultType, $resultMatch, $extra) = explode(',', $match . ',,,');
+				$res = sprintf($this->SFSclass->txt('sfs_log_matched_on'), $resultType, $resultMatch);
 
-			return $result;
+				// If this was a IP ban, note it.
+				if ($resultType == 'ip' && !empty($extra))
+					$res .= ' ' . $this->SFSclass->txt('sfs_log_auto_banned');
+				if ($resultType == 'username' && !empty($extra))
+					$res .= ' ' . sprintf($this->SFSclass->txt('sfs_log_confidence'), $extra);
+					
+				$results[] = $res;
+			}
+
+			return implode('<br>', $results);
 		}
 
 		return $row['result'];

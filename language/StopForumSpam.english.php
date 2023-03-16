@@ -3,6 +3,8 @@
 /* The section Name */
 $txt['sfs_admin_area'] = 'Stop Forum Spam';
 $txt['sfs_admin_logs'] = 'SFS Logs';
+$txt['sfs_admin_test'] = 'Test SFS';
+$txt['sfs_admin_test_desc'] = 'Test Stop Forum Spam API and your configuration';
 
 /* Admin Section General header */
 $txt['sfs_general_title'] = 'General Configuration';
@@ -18,6 +20,13 @@ $txt['sfs_username_confidence'] = 'Confidence level for usernames on registratio
 $txt['sfs_emailcheck'] = 'Check Email? (Recommended)';
 $txt['sfs_enablesubmission'] = 'Enable Submissions';
 $txt['sfs_apikey'] = '<a href="https://www.stopforumspam.com/keys">API Key</a>';
+
+/* Admin section: Required */
+$txt['sfs_required'] = 'Checks Required';
+$txt['sfs_required_any'] = 'Any [Email or Username | IP] (Default)';
+$txt['sfs_required_email_ip'] = 'Email & IP Address';
+$txt['sfs_required_email_username'] = 'Email & Username';
+$txt['sfs_required_username_ip'] = 'Username & IP Address';
 
 /* Admin section: Region Config */
 $txt['sfs_region'] = 'Geographic Access Region';
@@ -52,6 +61,13 @@ $txt['sfs_verification_options_extra_subtext'] = 'Used for other mods or areas t
 $txt['sfs_verOptionsMemExtra'] = 'Member Verification Sections';
 $txt['sfs_verfOptMemPostThreshold'] = 'Post Count after which we stop these checks.';
 $txt['sfs_verification_options_membersextra'] = 'Extra sections';
+
+/* Admin section: Test API */
+$txt['sfs_testapi_error'] = 'The API failed to communicate with the SFS servers';
+$txt['sfs_testapi_title'] = 'Enter test information';
+$txt['sfs_testapi_results'] = 'Results of Testing API';
+$txt['sfs_value'] = 'Value';
+$txt['sfs_testapi_submit'] = 'Send API Test';
 
 /* Request handling */
 $txt['sfs_request_failure'] = 'SFS Failed with invalid response';
