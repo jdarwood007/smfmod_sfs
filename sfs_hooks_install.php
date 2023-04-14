@@ -3,7 +3,7 @@
  * The Main class for Stop Forum Spam
  * @package StopForumSpam
  * @author SleePy <sleepy @ simplemachines (dot) org>
- * @copyright 2019
+ * @copyright 2023
  * @license 3-Clause BSD https://opensource.org/licenses/BSD-3-Clause
  */
 
@@ -18,21 +18,30 @@ elseif (!defined('SMF')) // If we are outside SMF and can't find SSI.php, then t
 if (SMF == 'SSI')
 	db_extend('packages');
 
-$hooks = array(
+$hooks = [
 	// Main sections.
-	'integrate_pre_include' => '$sourcedir/SFS.php',
+	'integrate_pre_include' => '$sourcedir/StopForumSpam.php',
 	'integrate_pre_load' => 'SFS::hook_pre_load',
 	'integrate_register' => 'SFS::hook_register',
 
 	// Admin Sections.
-	'integrate_admin_include' => '$sourcedir/SFS-Subs-Admin.php',
+	'integrate_admin_include' => '$sourcedir/StopForumSpam/SFS-Admin.php',
 	'integrate_admin_areas' => 'SFSA::hook_admin_areas',
 	'integrate_modify_modifications' => 'SFSA::hook_modify_modifications',
-	'integrate_manage_logs' => 'SFSA::hook_manage_logs',
+	'integrate_manage_logs' => 'SFSL::hook_manage_logs',
 
 	// Profile Section.
-	'integrate_profile_areas' => 'SFS::hook_pre_profile_areas'
-);
-
+	'integrate_profile_areas' => 'SFSP::hook_pre_profile_areas'
+];
 foreach ($hooks as $hook => $func)
 	add_integration_function($hook, $func, true);
+
+// Remove old hooks.
+$removeHooks = [
+	['integrate_manage_logs','SFSA::hook_manage_logs'],
+	['integrate_pre_include','$sourcedir/SFS.php'],
+	['integrate_admin_include','$sourcedir/SFS-Subs-Admin.php'],
+	['integrate_profile_areas','SFS::hook_pre_profile_areas']
+];
+foreach ($removeHooks as $remove)
+	remove_integration_function($remove[0], $remove[1]);

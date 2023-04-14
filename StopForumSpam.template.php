@@ -24,53 +24,16 @@ function template_profile_tracksfs()
 			<table class="table_grid">
 				<thead>
 					<tr class="title_bar">
-						<th class="lefttext half_table">', $txt['sfs_check'], '</th>
-						<th class="lefttext half_table">', $txt['sfs_result'], '</th>
+						<th class="lefttext">', $txt['sfs_check'], '</th>
+						<th class="lefttext">', $txt['sfs_value'], '</th>
+						<th class="lefttext">', $txt['sfs_result'], '</th>
 					</tr>
 				</thead>
 				<tbody>';
 
 	foreach ($context['sfs_checks'] as $id_check => $checkGrp)
-	{
 		foreach ($checkGrp as $check)
-		{
-			echo '
-					<tr class="windowbg">
-						<td title="sfs_check_', $id_check, '">
-							', $txt['sfs_check_' . $id_check];
-
-			// Show the IP we tested.
-			if ($id_check === 'ip')
-				echo ' <span class="smalltext">(', $check['value'], ')</span>';
-
-			echo '
-						</td>
-						<td class="smalltext">
-							', (!empty($check['appears']) ? $txt['yes'] : $txt['no']);
-
-			// Some checks will show the last seen, convert it and show it.
-			if (!empty($check['lastseen']))
-				echo '<br>' . $txt['sfs_last_seen'] . ': ' . timeformat(strtotime($check['lastseen']));
-
-			if (!empty($check['confidence']))
-				echo '<br>' . $txt['sfs_confidence'] . ': ' . $check['confidence'];
-
-			if (!empty($check['frequency']))
-				echo '<br>' . $txt['sfs_frequency'] . ': ' . $check['frequency'];
-
-			// IP address may be normalized
-			if (!empty($check['torexit']))
-				echo '<br>' . $txt['sfs_torexit'];
-
-			// IP address may be normalized
-			if (!empty($check['asn']))
-				echo '<br><a href="', $scripturl, '?action=profile;area=tracking;sa=ip;searchip=' . urlencode(str_replace('::*', ':*', !empty($check['normalized']) ? $check['normalized'] . '*' : $check['value'])) . '">', $txt['trackIP'], ' ',  (!empty($check['normalized']) ? $check['normalized'] . '*' : $check['value']), '</a>';
-
-			echo '
-						</td>
-					</tr>';
-		}
-	}
+			template_sfsa_result_row($id_check, $check, true);
 
 	echo '
 				</tbody>
@@ -112,7 +75,7 @@ function template_profile_tracksfs()
 
 function template_sfsa_testapi()
 {
-	global $context, $txt, $scripturl;
+	global $context, $txt;
 
 	echo '
 		<div id="admin_form_wrapper">
@@ -159,6 +122,13 @@ function template_sfsa_testapi()
 	if (empty($context['test_sent']))
 		return;
 
+	template_sfsa_testapi_results();
+}
+
+function template_sfsa_testapi_results()
+{
+	global $context, $txt;
+
 	echo '
 		<div class="tborder">
 			<div class="cat_bar">
@@ -176,13 +146,28 @@ function template_sfsa_testapi()
 				<tbody>';
 
 	foreach ($context['sfs_checks'] as $id_check => $checkGrp)
-	{
 		foreach ($checkGrp as $check)
-		{
-			echo '
+			template_sfsa_result_row($id_check, $check);
+
+	echo '
+				</tbody>
+			</table>';
+}
+
+function template_sfsa_result_row(string $id_check, array $check, bool $show_ip = false)
+{
+	global $context, $txt, $scripturl;
+
+	echo '
 					<tr class="windowbg">
 						<td title="sfs_check_', $id_check, '">
-							', $txt['sfs_check_' . $id_check], '
+							', $txt['sfs_check_' . $id_check];
+
+			// Show the IP we tested.
+			if ($show_ip && $id_check === 'ip')
+				echo ' <span class="smalltext">(', $check['value'], ')</span>';
+
+			echo '
 						</td>
 						<td>
 							', $check['value'], '
@@ -190,32 +175,25 @@ function template_sfsa_testapi()
 						<td class="smalltext">
 							', (!empty($check['appears']) ? $txt['yes'] : $txt['no']);
 
-			// Some checks will show the last seen, convert it and show it.
-			if (!empty($check['lastseen']))
-				echo '<br>' . $txt['sfs_last_seen'] . ': ' . timeformat(strtotime($check['lastseen']));
+	// Some checks will show the last seen, convert it and show it.
+	if (!empty($check['lastseen']))
+		echo '<br>' . $txt['sfs_last_seen'] . ': ' . timeformat(strtotime($check['lastseen']));
 
-			if (!empty($check['confidence']))
-				echo '<br>' . $txt['sfs_confidence'] . ': ' . $check['confidence'];
+	if (!empty($check['confidence']))
+		echo '<br>' . $txt['sfs_confidence'] . ': ' . $check['confidence'];
 
-			if (!empty($check['frequency']))
-				echo '<br>' . $txt['sfs_frequency'] . ': ' . $check['frequency'];
+	if (!empty($check['frequency']))
+		echo '<br>' . $txt['sfs_frequency'] . ': ' . $check['frequency'];
 
-			// IP address may be normalized
-			if (!empty($check['torexit']))
-				echo '<br>' . $txt['sfs_torexit'];
+	// IP address may be normalized
+	if (!empty($check['torexit']))
+		echo '<br>' . $txt['sfs_torexit'];
 
-			// IP address may be normalized
-			if (!empty($check['asn']))
-				echo '<br><a href="', $scripturl, '?action=profile;area=tracking;sa=ip;searchip=' . urlencode(str_replace('::*', ':*', !empty($check['normalized']) ? $check['normalized'] . '*' : $check['value'])) . '">', $txt['ip_address'], ' ',  (!empty($check['normalized']) ? $check['normalized'] . '*' : $check['value']), '</a>';
-
-			echo '
-						</td>
-					</tr>';
-		}
-	}
+	// IP address may be normalized
+	if (!empty($check['asn']))
+		echo '<br><a href="', $scripturl, '?action=profile;area=tracking;sa=ip;searchip=' . urlencode(str_replace('::*', ':*', !empty($check['normalized']) ? $check['normalized'] . '*' : $check['value'])) . '">', $txt['ip_address'], ' ',  (!empty($check['normalized']) ? $check['normalized'] . '*' : $check['value']), '</a>';
 
 	echo '
-				</tbody>
-			</table>';
-
+						</td>
+					</tr>';
 }
