@@ -191,7 +191,7 @@ function template_sfsa_result_row(string $id_check, array $check, bool $show_ip 
 
 	// IP address may be normalized
 	if (!empty($check['asn']))
-		echo '<br><a href="', $scripturl, '?action=profile;area=tracking;sa=ip;searchip=' . urlencode(str_replace('::*', ':*', !empty($check['normalized']) ? $check['normalized'] . '*' : $check['value'])) . '">', $txt['ip_address'], ' ',  (!empty($check['normalized']) ? $check['normalized'] . '*' : $check['value']), '</a>';
+		echo '<br><a href="', $scripturl, '?action=profile;area=tracking;sa=ip;searchip=' . urlencode(str_replace('::*', ':*', !empty($check['normalized']) ? $check['normalized'] . '*' : $check['value'])) . '">', $txt['ip_address'], ' ', (!empty($check['normalized']) ? $check['normalized'] . '*' : $check['value']), '</a>';
 
 	echo '
 						</td>

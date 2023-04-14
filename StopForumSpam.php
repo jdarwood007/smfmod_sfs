@@ -225,7 +225,8 @@ class SFS
 			'search' => $this->user_info['is_guest'] || empty($this->user_info['posts']) || $this->user_info['posts'] < $this->modSettings['sfs_verfOptMemPostThreshold'],
 		];
 
-		foreach (array_filter($verificationMap, function($extendedChecks, $key) use ($thisVerification, $options) {
+		foreach (array_filter($verificationMap, function($extendedChecks, $key) use ($thisVerification, $options)
+		{
 			return $thisVerification['id'] == $key && in_array($key, $options);
 		}, ARRAY_FILTER_USE_BOTH) as $key => $extendedChecks)
 			return call_user_func(array($this, 'checkVerificationTest' . ucfirst($key)));
@@ -319,7 +320,7 @@ class SFS
 	 */
 	private function checkVerificationTestExtra(array $thisVerification): bool
 	{
-		foreach (array_filter($this->extraVerificationOptions, function ($option) use ($thisVerification) {return $thisVerification['id'] == $option;})  as $option)
+		foreach (array_filter($this->extraVerificationOptions, function($option) use ($thisVerification) {return $thisVerification['id'] == $option; })  as $option)
 		{
 			// Always try to send off IPs.
 			$checks = [
@@ -329,12 +330,12 @@ class SFS
 
 			// Can we find a username?
 			$possibleUserNames = ['username', 'user_name', 'user', 'name', 'realname'];
-			$searchKey = current(array_filter($possibleUserNames, function($k) {return !empty($_POST[$k]);}));
+			$searchKey = current(array_filter($possibleUserNames, function($k) {return !empty($_POST[$k]); }));
 			$checks[] = ['username' => $_POST[$searchKey]];
 
 			// Can we find a email?
 			$possibleEmails = ['email', 'emailaddress', 'email_address'];
-			$searchKey = current(array_filter($possibleEmails, function($k) {return !empty($_POST[$k]);}));
+			$searchKey = current(array_filter($possibleEmails, function($k) {return !empty($_POST[$k]); }));
 			$checks[] = ['email' => $_POST[$searchKey]];
 
 			return $this->sfsCheck($checks, $option);
@@ -530,7 +531,7 @@ class SFS
 		$this->loadSources(['SFS-Bans']);
 
 		$requestBlocked = '';
-		foreach (array_filter($ips, function ($check) {return !empty($check['appears']);}) as $check)
+		foreach (array_filter($ips, function ($check) {return !empty($check['appears']); }) as $check)
 		{
 			// Ban them because they are black listed?
 			$autoBlackListResult = '0';
@@ -559,7 +560,7 @@ class SFS
 	private function sfsCheck_username(array $usernames, string $area = ''): string
 	{
 		$requestBlocked = '';
-		foreach (array_filter($usernames, function ($check) {return !empty($check['appears']);}) as $check)
+		foreach (array_filter($usernames, function ($check) {return !empty($check['appears']); }) as $check)
 		{
 			// Combine with $area we could also require admin approval above thresholds on things like register.
 			$shouldBlock = true;
@@ -597,7 +598,7 @@ class SFS
 	private function sfsCheck_email(array $email, string $area = ''): string
 	{
 		$requestBlocked = '';
-		foreach (array_filter($email, function ($check) {return !empty($check['appears']);}) as $check)
+		foreach (array_filter($email, function ($check) {return !empty($check['appears']); }) as $check)
 		{
 			$this->logBlockedStats('email', $check);
 			$requestBlocked = 'email,' . $this->smcFunc['htmlspecialchars']($check['value']);
@@ -626,10 +627,10 @@ class SFS
 		foreach ($checks as $chk)
 		{
 			// Hold up, we are not processing this check.
-			$chk = array_filter($chk, function($value, $type) {return !(in_array($type, ['email', 'username', 'ip']) && empty($this->modSettings['sfs_' . $type . 'check']));}, ARRAY_FILTER_USE_BOTH);
+			$chk = array_filter($chk, function($value, $type) {return !(in_array($type, ['email', 'username', 'ip']) && empty($this->modSettings['sfs_' . $type . 'check'])); }, ARRAY_FILTER_USE_BOTH);
 
 			// No value? Can't do this.
-			$chk = array_filter($chk, function($value) {return !empty($value);});
+			$chk = array_filter($chk, function($value) {return !empty($value); });
 
 			foreach ($chk as $type => $value)
 			{

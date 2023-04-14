@@ -503,7 +503,7 @@ class SFSA
 			$this->context['test_api_error'] = $this->SFSclass->txt('sfs_request_failure_nodata');
 		else
 			// Parse all the responses out.
-			foreach($this->context['sfs_checks'] as $key => &$res)
+			foreach ($this->context['sfs_checks'] as $key => &$res)
 				$res[0] += $response[$key][0];
 	}
 }
