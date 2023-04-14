@@ -83,9 +83,9 @@ class SFSA
 	 * @uses integrate__admin_areas - Hook SMF2.1
 	 * @return void No return is generated
 	 */
-	public static function hook_admin_areas(array &$admin_areas)
+	public static function hook_admin_areas(array &$admin_areas): void
 	{
-		return self::selfClass()->setupAdminAreas($admin_areas);
+		self::selfClass()->setupAdminAreas($admin_areas);
 	}
 
 	/**
@@ -152,9 +152,9 @@ class SFSA
 	 * @uses integrate_modify_modifications - Hook SMF2.1
 	 * @return void No return is generated
 	 */
-	public static function hook_modify_modifications(array &$subActions)
+	public static function hook_modify_modifications(array &$subActions): void
 	{
-		return self::selfClass()->setupModifyModifications($subActions);
+		self::selfClass()->setupModifyModifications($subActions);
 	}
 
 	/**
@@ -347,14 +347,6 @@ class SFSA
 	 */
 	public static function hook_manage_registrations(array &$subActions): bool
 	{
-		global $context;
-
-		// Add our logs sub action.
-		$subActions['sfstest'] = ['SFSA::startupTest', 'admin_forum'];
-
-		if (isset($_REQUEST['sa']) && $_REQUEST['sa'] == 'sfstest' && allowedTo('admin_forum'))
-			$context['sub_action'] = 'sfstest';
-
 		return self::selfClass()->AddToRegCenterMenu($subActions);
 	}
 
@@ -371,6 +363,12 @@ class SFSA
 	 */
 	public function AddToRegCenterMenu(array &$subActions): bool
 	{
+		// Add our logs sub action.
+		$subActions['sfstest'] = ['SFSA::startupTest', 'admin_forum'];
+
+		if (isset($_REQUEST['sa']) && $_REQUEST['sa'] == 'sfstest' && allowedTo('admin_forum'))
+			$this->context['sub_action'] = 'sfstest';
+
 		$this->context[$this->context['admin_menu_name']]['tab_data']['tabs']['sfstest'] = [
 			'description' => $this->SFSclass->txt('sfs_admin_test_desc'),
 		];
@@ -395,7 +393,7 @@ class SFSA
 	 */
 	public static function startupTest(bool $return_config = false): array
 	{
-		return self::selfClass()->loadTestAPI();
+		return self::selfClass()->loadTestAPI($return_config);
 	}
 
 	/**

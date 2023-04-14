@@ -364,7 +364,7 @@ class SFS
 		if ($response === [])
 		{
 			$this->logAllStats('error', $checks, 'error');
-			log_error($this->txt('sfs_request_failure_nodata') . ':' . $requestURL, 'critical');
+			log_error($this->txt('sfs_request_failure_nodata') . ':' . $this->buildServerURL(), 'critical');
 			return true;
 		}
 
@@ -465,6 +465,7 @@ class SFS
 			'email' => !empty($this->modSettings['sfs_emailcheck']) && !empty($response['email'])
 		];
 
+		$requestBlocked = '';
 		foreach ($checkMap as $key => $checkEnabled)
 			if (empty($requestBlocked) && $checkEnabled)
 				$requestBlocked = call_user_func(array($this, 'sfsCheck_' . $key), $response[$key], $area);
@@ -901,7 +902,7 @@ class SFS
 		// Standard options.
 		$options = $this->Decode($this->modSettings[$optionsKey]);
 
-		if (empty($options))
+		if (empty($options) || !is_array($options))
 			$options = [];
 
 		// Extras.

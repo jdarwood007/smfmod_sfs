@@ -150,7 +150,7 @@ class SFSB
 		$id_ban_group = $this->getBanGroup();
 		if (!empty($id_ban_group))
 		{
-			updateSettings(['sfs_ipcheck_autoban_group' => $ban_data['id_ban_group']]);
+			updateSettings(['sfs_ipcheck_autoban_group' => $id_ban_group]);
 			return true;
 		}
 
@@ -198,7 +198,6 @@ class SFSB
 	 */
 	private function getBanGroup(): ?int
 	{
-		$ban_group_id = null;
 		// Maybe just got unlinked, if we can find the matching name, relink it.
 		$request = $this->smcFunc['db_query']('', '
 			SELECT id_ban_group
@@ -215,14 +214,12 @@ class SFSB
 			$this->smcFunc['db_free_result']($request);
 
 			if (!empty($ban_data['id_ban_group']))
-			{
-				$ban_group_id = $ban_data['id_ban_group'];
-				return true;
-			}
+				return $ban_data['id_ban_group'];
 		}
-		$this->smcFunc['db_free_result']($request);
+		else
+			$this->smcFunc['db_free_result']($request);
 
-		return $ban_group_id;
+		return null;
 	}
 
 	/**

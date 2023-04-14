@@ -170,10 +170,6 @@ class SFSP
 		$cache_key = 'sfs_check_member-' . $this->memID;
 
 		// Do we have a message?
-		$poster_name = null;
-		$poster_email = null;
-		$poster_ip = null;
-		$post_body = null;
 		if (isset($_GET['msg']) && intval($_GET['msg']) > 0)
 		{
 			$row = $this->TrackSFSMessage((int) $_GET['msg']);
@@ -285,8 +281,8 @@ class SFSP
 		// Now we have a URL, lets go get it.
 		$result = fetch_web_data('https://www.stopforumspam.com/add', $post_data);
 
-		if (strpos($result, 'data submitted successfully') === false)
-			$this->context['submission_failed'] = $this->txt('sfs_submission_error');
+		if ($result === false || strpos($result, 'data submitted successfully') === false)
+			$this->context['submission_failed'] = $this->SFSclass->txt('sfs_submission_error');
 		elseif (isset($_POST['sfs_submitban']))
 			redirectexit($this->scripturl . '?action=admin;area=ban;sa=add;u=' . $this->memID);
 		else
