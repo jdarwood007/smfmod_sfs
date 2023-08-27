@@ -504,6 +504,6 @@ class SFSA
 		else
 			// Parse all the responses out.
 			foreach ($this->context['sfs_checks'] as $key => &$res)
-				$res[0] += $response[$key][0];
+				$res[0] += $response[$key][0] ?? [];
 	}
 }
