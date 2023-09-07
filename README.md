@@ -10,19 +10,19 @@ On registration this can check the following fields:
 - Username
 - Email Address
 - IP Address
-- 
+
 On Posts this can check the following fields
 - Username
 - Email Address
 - IP Address
-- 
-On Search this chan check:
+
+On Search this can check:
 - IP Address
-- 
+
 On Report(ing) posts this can check:
 - Email
 - IP Address
-- 
+
 This can also check custom forms by specifying the id of the field in a comma separated list into the extra fields options.
 
 ### Setup
