@@ -253,7 +253,7 @@ class SFSP
 			]);
 		if ($this->smcFunc['db_num_rows']($request) == 1)
 		{
-			$row = $this->smcFunc['db_fetch_row']($request);
+			$row = $this->smcFunc['db_fetch_assoc']($request);
 			$row['poster_ip'] = inet_dtop($row['poster_ip']);
 		}
 		$this->smcFunc['db_free_result']($request);
