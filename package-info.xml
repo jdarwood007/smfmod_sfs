@@ -3,7 +3,7 @@
 <package-info xmlns="http://www.simplemachines.org/xml/package-info" xmlns:smf="http://www.simplemachines.org/">
 	<id>SleePy:StopForumSpam</id>
 	<name>Stop Forum Spam</name>
-	<version>1.5.1</version>
+	<version>1.5.2</version>
 	<type>modification</type>
 
 	<!-- 2.0 has no support for hooks -->
@@ -76,7 +76,7 @@
 			<hook hook="integrate_manage_registrations" function="SFSA::hook_manage_registrations" />
 
 			<!-- Profile Section -->
-			<hook hook="integrate_pre_profile_areas" function="SFS::hook_pre_profile_areas" />
+			<hook hook="integrate_pre_profile_areas" function="SFSP::hook_pre_profile_areas" file="$sourcedir/StopForumSpam/SFS-Profile.php" />
 
 			<!-- Display Section -->
 			<hook hook="integrate_prepare_display_context" function="SFS::hook_prepare_display_context" />
@@ -97,14 +97,14 @@
 			<hook hook="integrate_create_control_verification_test" function="SFS::hook_create_control_verification_test" reverse="true" />
 
 			<!-- Admin Section -->
-			<hook hook="integrate_admin_include" function="$sourcedir/SFS-Subs-Admin.php" reverse="true" />
+			<hook hook="integrate_admin_include" function="$sourcedir/StopForumSpam/SFS-Admin.php" reverse="true" />
 			<hook hook="integrate_admin_areas" function="SFSA::hook_admin_areas" reverse="true" />
 			<hook hook="integrate_modify_modifications" function="SFSA::hook_modify_modifications" reverse="true" />
-			<hook hook="integrate_manage_logs" function="SFSL::hook_manage_logs" reverse="true" file="$sourcedir/SFS-Subs-Logs.php" />
+			<hook hook="integrate_manage_logs" function="SFSL::hook_manage_logs" file="$sourcedir/StopForumSpam/SFS-Logs.php" reverse="true" />
 			<hook hook="integrate_manage_registrations" function="SFSA::hook_manage_registrations" reverse="true" />
 
 			<!-- Profile Section -->
-			<hook hook="integrate_pre_profile_areas" function="SFS::hook_pre_profile_areas" reverse="true" />
+			<hook hook="integrate_pre_profile_areas" function="SFSP::hook_pre_profile_areas" file="$sourcedir/StopForumSpam/SFS-Profile.php" reverse="true" />
 
 			<!-- Display Section -->
 			<hook hook="integrate_prepare_display_context" function="SFS::hook_prepare_display_context" reverse="true" />
@@ -121,7 +121,7 @@
 		<remove-file name="$themedir/images/admin/sfs.webp" />
 	</uninstall>
 
-	<upgrade from="1.0-1.5" for="2.1.*">
+	<upgrade from="1.0-1.5.1" for="2.1.*">
 		<require-file name="language/StopForumSpam.english.php" destination="$themes_dir/default/languages" />
         <require-file name="language/StopForumSpam.finnish.php" destination="$themes_dir/default/languages" />
 
@@ -143,7 +143,9 @@
 		<hook hook="integrate_manage_logs" function="SFSA::hook_manage_logs" reverse="true" error="ignore" />
 		<hook hook="integrate_manage_logs" function="SFSL::hook_manage_logs" file="$sourcedir/StopForumSpam/SFS-Logs.php" />
 
-		<hook hook="integrate_pre_profile_areas" function="SFS::hook_pre_profile_areas" />
+		<hook hook="integrate_pre_profile_areas" function="SFSP::hook_pre_profile_areas" file="$sourcedir/StopForumSpam/SFS-Profile.php" />
+		<hook hook="integrate_pre_profile_areas" function="SFS::hook_pre_profile_areas" reverse="true" />
+
 		<hook hook="integrate_prepare_display_context" function="SFS::hook_prepare_display_context" />
 		<hook hook="integrate_mod_buttons" function="SFS::hook_mod_buttons" />
 
@@ -152,7 +154,7 @@
 		<require-file name="sfs.webp" destination="$themedir/images/admin" />
 	</upgrade>
 
-	<upgrade from="1.0-1.5" for="2.0.*">
+	<upgrade from="1.0-1.4" for="2.0.*">
 		<code type="file">sfs_hooks_install.php</code>
 
 		<require-file name="language/StopForumSpam.english.php" destination="$themes_dir/default/languages" />
