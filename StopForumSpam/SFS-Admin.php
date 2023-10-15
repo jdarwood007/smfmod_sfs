@@ -218,14 +218,14 @@ class SFSA
 	 */
 	private function setupSFSConfiguration(bool $return_config = false): array
 	{
-		$config_vars = $this->getConfiguraiton();
+		$config_vars = $this->getConfiguration();
 
 		if ($return_config)
 			return $config_vars;
 
 		// Saving?
 		if (isset($_GET['save']))
-			$this->saveConfiguraiton($config_vars);
+			$this->saveConfiguration($config_vars);
 
 		$this->context['post_url'] = $this->adminPageURL . ';save';
 		prepareDBSettingContext($config_vars);
@@ -244,7 +244,7 @@ class SFSA
 	 * @since 1.5.0
 	 * @return void No return is generated
 	 */
-	private function getConfiguraiton(): array
+	private function getConfiguration(): array
 	{
 		return [
 				['title', 'sfsgentitle', 'label' => $this->SFSclass->txt('sfs_general_title')],
@@ -312,7 +312,7 @@ class SFSA
 	 * @since 1.5.0
 	 * @return void No return is generated
 	 */
-	private function saveConfiguraiton(array $config_vars): void
+	private function saveConfiguration(array $config_vars): void
 	{
 		// Turn the defaults off.
 		$this->SFSclass->unloadDefaults();
