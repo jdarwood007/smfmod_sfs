@@ -385,8 +385,8 @@ class SFS
 		if (empty($requestBlocked))
 			return true;
 
-		// You are a bad spammer, don't tell them what was blocked.
-		fatal_error($this->txt('sfs_request_blocked'));
+		// You are a bad spammer, but don't tell them what was blocked.
+		fatal_error($this->txt('sfs_request_blocked'), false);
 	}
 
 	/**
