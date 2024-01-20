@@ -901,7 +901,7 @@ class SFS
 		$optionsKeyExtra = $this->user_info['is_guest'] ? 'sfs_verification_options_extra' : 'sfs_verOptionsMemExtra';
 
 		// Standard options.
-		$options = $this->Decode($this->modSettings[$optionsKey]);
+		$options = $this->Decode($this->modSettings[$optionsKey] ?? '');
 
 		if (empty($options) || !is_array($options))
 			$options = [];
@@ -1054,8 +1054,11 @@ class SFS
 	 * @version 1.5.0
 	 * @since 1.5.0
 	*/
-	private function Decode(string $data)
+	private function Decode(string $data): ?array
 	{
+		if (empty($data))
+			return null;
+
 		if ($this->versionCheck('2.0', 'smf') && !empty($data))
 			return safe_unserialize($data);
 		elseif (!empty($data))
@@ -1070,7 +1073,7 @@ class SFS
 	 * @since 1.5.0
 	 * @param array $sourcesThe list of additional sources to load.
 	*/
-	public function createToken($action, $type = 'post'): array|null
+	public function createToken($action, $type = 'post'): ?array
 	{
 		if (!$this->versionCheck('2.0', 'smf'))
 			return createToken($action, $type);
