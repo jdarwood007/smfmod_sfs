@@ -249,8 +249,14 @@ class SFS
 		// Guests!
 		if ($this->user_info['is_guest'])
 		{
-			$guestname = !isset($_POST['guestname']) ? '' : trim($_POST['guestname']);
+			$guestname = !isset($_POST['guestname']) ? '' : trim(normalize_spaces(sanitize_chars($_POST['guestname'], 1, ' '), true, true, array('no_breaks' => true, 'replace_tabs' => true, 'collapse_hspace' => true)));
 			$email = !isset($_POST['email']) ? '' : trim($_POST['email']);
+
+			// SMF will take care of these if we are checking them.
+			if (!empty($this->modSettings['sfs_emailcheck']) && empty($modSettings['guest_post_no_email']) && empty($email))
+				return false;
+			else if (!empty($this->modSettings['sfs_usernamecheck']) && empty($guestname))
+				return false;
 
 			return $this->sfsCheck([
 				['username' => $guestname],
