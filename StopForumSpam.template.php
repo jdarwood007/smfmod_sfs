@@ -4,16 +4,18 @@ function template_profile_tracksfs()
 {
 	global $txt, $context, $scripturl;
 
-	if (!empty($context['submission_success']))
+	if (!empty($context['submission_success'])) {
 		echo '
 	<div class="infobox">', $context['submission_success'] , '</div>';
-	elseif (!empty($context['submission_failed']))
+	} elseif (!empty($context['submission_failed'])) {
 		echo '
 	<div class="errorbox">', $context['submission_failed'], '</div>';
+	}
 
-	if (!empty($context['sfs_allow_submit']))
+	if (!empty($context['sfs_allow_submit'])) {
 		echo '
 	<form action="', $context['sfs_submit_url'], '" method="post">';
+	}
 
 	echo '
 		<div class="tborder">
@@ -31,15 +33,17 @@ function template_profile_tracksfs()
 				</thead>
 				<tbody>';
 
-	foreach ($context['sfs_checks'] as $id_check => $checkGrp)
-		foreach ($checkGrp as $check)
+	foreach ($context['sfs_checks'] as $id_check => $checkGrp) {
+		foreach ($checkGrp as $check) {
 			template_sfsa_result_row($id_check, $check, true);
+		}
+	}
 
 	echo '
 				</tbody>
 			</table>';
 
-	if (!empty($context['sfs_allow_submit']))
+	if (!empty($context['sfs_allow_submit'])) {
 		echo '
 			<br>
 			<div>
@@ -55,18 +59,19 @@ function template_profile_tracksfs()
 					</div>
 				</div>
 			</div>';
+	}
 
 	echo '
 		</div><!-- .tborder -->';
 
-	if (!empty($context['sfs_allow_submit']))
-	{
+	if (!empty($context['sfs_allow_submit'])) {
 		echo '
 		<input type="hidden" name="', $context['session_var'], '" value="', $context['session_id'], '">';
 
-		if (!empty($context['token_check']))
+		if (!empty($context['token_check'])) {
 			echo '
 		<input type="hidden" name="' . $context[$context['token_check'] . '_token_var'] . '" value="' . $context[$context['token_check'] . '_token'] . '">';
+		}
 
 		echo '
 	</form>';
@@ -107,9 +112,10 @@ function template_sfsa_testapi()
 						<input type="submit" name="send" value="', $txt['sfs_testapi_submit'], '" tabindex="', $context['tabindex']++, '" class="button">
 						<input type="hidden" name="', $context['session_var'], '" value="', $context['session_id'], '">';
 
-	if (!empty($context['token_check']))
+	if (!empty($context['token_check'])) {
 		echo '
 		<input type="hidden" name="' . $context[$context['token_check'] . '_token_var'] . '" value="' . $context[$context['token_check'] . '_token'] . '">';
+	}
 
 	echo '
 					</div>
@@ -119,8 +125,9 @@ function template_sfsa_testapi()
 	<br class="clear">';
 
 	// Do not show results yet.
-	if (empty($context['test_sent']))
+	if (empty($context['test_sent'])) {
 		return;
+	}
 
 	template_sfsa_testapi_results();
 }
@@ -145,9 +152,11 @@ function template_sfsa_testapi_results()
 				</thead>
 				<tbody>';
 
-	foreach ($context['sfs_checks'] as $id_check => $checkGrp)
-		foreach ($checkGrp as $check)
+	foreach ($context['sfs_checks'] as $id_check => $checkGrp) {
+		foreach ($checkGrp as $check) {
 			template_sfsa_result_row($id_check, $check);
+		}
+	}
 
 	echo '
 				</tbody>
@@ -164,8 +173,9 @@ function template_sfsa_result_row(string $id_check, array $check, bool $show_ip 
 							', $txt['sfs_check_' . $id_check];
 
 			// Show the IP we tested.
-			if ($show_ip && $id_check === 'ip')
+			if ($show_ip && $id_check === 'ip') {
 				echo ' <span class="smalltext">(', $check['value'], ')</span>';
+			}
 
 			echo '
 						</td>
@@ -176,22 +186,27 @@ function template_sfsa_result_row(string $id_check, array $check, bool $show_ip 
 							', (!empty($check['appears']) ? $txt['yes'] : $txt['no']);
 
 	// Some checks will show the last seen, convert it and show it.
-	if (!empty($check['lastseen']))
+	if (!empty($check['lastseen'])) {
 		echo '<br>' . $txt['sfs_last_seen'] . ': ' . timeformat(strtotime($check['lastseen']));
+	}
 
-	if (!empty($check['confidence']))
+	if (!empty($check['confidence'])) {
 		echo '<br>' . $txt['sfs_confidence'] . ': ' . $check['confidence'];
+	}
 
-	if (!empty($check['frequency']))
+	if (!empty($check['frequency'])) {
 		echo '<br>' . $txt['sfs_frequency'] . ': ' . $check['frequency'];
+	}
 
 	// IP address may be normalized
-	if (!empty($check['torexit']))
+	if (!empty($check['torexit'])) {
 		echo '<br>' . $txt['sfs_torexit'];
+	}
 
 	// IP address may be normalized
-	if (!empty($check['asn']))
+	if (!empty($check['asn'])) {
 		echo '<br><a href="', $scripturl, '?action=profile;area=tracking;sa=ip;searchip=' . urlencode(str_replace('::*', ':*', !empty($check['normalized']) ? $check['normalized'] . '*' : $check['value'])) . '">', $txt['ip_address'], ' ', (!empty($check['normalized']) ? $check['normalized'] . '*' : $check['value']), '</a>';
+	}
 
 	echo '
 						</td>

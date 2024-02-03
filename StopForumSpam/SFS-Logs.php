@@ -28,7 +28,7 @@ class SFSL
 	 * @var mixed Search area handling.
 	 */
 	private array $search_types = [];
-	private /*string|array*/ $search_params = [];
+	/*string|array*/ private $search_params = [];
 	private array $logSearch = [];
 	private string $sort_order = 'time';
 	private string $search_params_column = '';
@@ -60,8 +60,9 @@ class SFSL
 	 */
 	public static function selfClass(): self
 	{
-		if (!isset($GLOBALS['context']['instances'][__CLASS__]))
+		if (!isset($GLOBALS['context']['instances'][__CLASS__])) {
 			$GLOBALS['context']['instances'][__CLASS__] = new self();
+		}
 
 		return $GLOBALS['context']['instances'][__CLASS__];
 	}
@@ -73,13 +74,14 @@ class SFSL
 	 * @CalledIn SMF 2.0, SMF 2.1
 	 * @version 1.5.0
 	 * @since 1.2
-	 * @return void No return is generated
 	 */
 	public function __construct()
 	{
 		$this->scripturl = $GLOBALS['scripturl'];
-		foreach (['context', 'smcFunc', 'txt', 'modSettings'] as $f)
+
+		foreach (['context', 'smcFunc', 'txt', 'modSettings'] as $f) {
 			$this->{$f} = &$GLOBALS[$f];
+		}
 
 		$this->SFSclass = &$this->smcFunc['classSFS'];
 		$this->SFSAclass = SFSA::selfClass();
@@ -99,7 +101,6 @@ class SFSL
 	 * @version 1.5.0
 	 * @since 1.0
 	 * @uses integrate_manage_logs - Hook SMF2.1
-	 * @return void No return is generated
 	 */
 	public static function hook_manage_logs(array &$log_functions): bool
 	{
@@ -118,7 +119,6 @@ class SFSL
 	 * @See SFSA::startupLogs
 	 * @version 1.5.0
 	 * @since 1.1
-	 * @return void No return is generated
 	 */
 	public function AddToLogMenu(array &$log_functions): bool
 	{
@@ -144,7 +144,6 @@ class SFSL
 	 * @since 1.0
 	 * @uses hook_manage_logs - Hook SMF2.1
 	 * @uses setupModifyModifications - Injected SMF2.0
-	 * @return void No return is generated
 	 */
 	public static function startupLogs(bool $return_config = false): array
 	{
@@ -165,13 +164,13 @@ class SFSL
 	 * @since 1.0
 	 * @uses hook_manage_logs - Hook SMF2.1
 	 * @uses setupModifyModifications - Injected SMF2.0
-	 * @return void No return is generated
 	 */
 	public function loadLogs(bool $return_config = false): array
 	{
 		// No Configs.
-		if ($return_config)
+		if ($return_config) {
 			return [];
+		}
 
 		$this->SFSclass->loadLanguage('Modlog');
 
@@ -181,8 +180,9 @@ class SFSL
 		$this->canDeleteLogs = allowedTo('admin_forum');
 
 		// Remove all..
-		if ((isset($_POST['removeall']) || isset($_POST['delete'])) && $this->canDeleteLogs)
+		if ((isset($_POST['removeall']) || isset($_POST['delete'])) && $this->canDeleteLogs) {
 			$this->handleLogDeletes();
+		}
 
 		$sort_types = $this->handleLogsGetSortTypes();
 
@@ -250,7 +250,7 @@ class SFSL
 				'token' => empty($token) ? null : 'sfs_logs',
 				'hidden_fields' => [
 					$this->context['session_var'] => $this->context['session_id'],
-					'params' => $this->search_params
+					'params' => $this->search_params,
 				],
 			],
 			'additional_rows' => [
@@ -266,17 +266,17 @@ class SFSL
 	 * @CalledIn SMF2.0, SMF 2.1
 	 * @version 1.5.0
 	 * @since 1.1
-	 * @return void Nothing is returned, the logs are deleted as requested and admin redirected.
 	 */
 	private function handleLogDeletes(): void
 	{
 		checkSession();
 		$this->SFSclass->createToken('sfs_logs', 'post');
 
-		if (isset($_POST['removeall']) && $this->canDeleteLogs)
+		if (isset($_POST['removeall']) && $this->canDeleteLogs) {
 			$this->removeAllLogs();
-		elseif (!empty($_POST['remove']) && isset($_POST['delete']) && $this->canDeleteLogs)
+		} elseif (!empty($_POST['remove']) && isset($_POST['delete']) && $this->canDeleteLogs) {
 			$this->removeLogs(array_unique($_POST['delete']));
+		}
 	}
 
 	/**
@@ -291,7 +291,7 @@ class SFSL
 	private function handleLogsGetSortTypes(): array
 	{
 		return [
-			'id_type' =>'l.id_type',
+			'id_type' => 'l.id_type',
 			'log_time' => 'l.log_time',
 			'url' => 'l.url',
 			'member' => 'mem.id_member',
@@ -618,8 +618,7 @@ class SFSL
 				'value' => '<input type="checkbox" name="all" class="input_check" onclick="invertAll(this, this.form);" />',
 			],
 			'data' => [
-				'function' => function($entry)
-				{
+				'function' => function ($entry) {
 					return '<input type="checkbox" class="input_check" name="delete[]" value="' . $entry['id'] . '"' . ($entry['editable'] ? '' : ' disabled="disabled"') . ' />';
 				},
 				'style' => 'text-align: center;',
@@ -643,12 +642,13 @@ class SFSL
 	 * @since 1.0
 	 * @uses hook_manage_logs - Hook SMF2.1
 	 * @uses setupModifyModifications - Injected SMF2.0
-	 * @return void No return is generated
 	 */
 	public function getSFSLogEntries(int $start, int $items_per_page, string $sort, string $query_string = '', array $query_params = []): array
 	{
 		// Fetch all of our logs.
-		$result = $this->smcFunc['db_query']('', '
+		$result = $this->smcFunc['db_query'](
+			'',
+			'
 			SELECT
 				l.id_sfs, l.id_type, l.log_time, l.url, l.id_member, l.username, l.email, l.ip, l.ip2, l.checks, l.result,
 				mem.real_name, mg.group_name
@@ -664,12 +664,14 @@ class SFSL
 				'start' => $start,
 				'items_per_page' => $items_per_page,
 				'reg_group_id' => 0,
-			])
+			]),
 		);
 
 		$entries = [];
-		while ($row = $this->smcFunc['db_fetch_assoc']($result))
+
+		while ($row = $this->smcFunc['db_fetch_assoc']($result)) {
 			$entries[$row['id_sfs']] = $this->getSFSLogPrepareEntry($row);
+		}
 		$this->smcFunc['db_free_result']($result);
 
 		return $entries;
@@ -728,19 +730,22 @@ class SFSL
 		$checksDecoded = $this->SFSclass->decodeJSON($row['checks']);
 
 		// If we know what check triggered this, link it up to be searched.
-		if ($row['id_type'] == 1)
+		if ($row['id_type'] == 1) {
 			$checks = '<a href="' . sprintf($this->urlSFSsearch, $checksDecoded['value']) . '">' . $checksDecoded['value'] . '</a>';
-		elseif ($row['id_type'] == 2)
+		} elseif ($row['id_type'] == 2) {
 			$checks = '<a href="' . sprintf($this->urlSFSsearch, $checksDecoded['value']) . '">' . $checksDecoded['value'] . '</a>';
-		elseif ($row['id_type'] == 3)
+		} elseif ($row['id_type'] == 3) {
 			$checks = '<a href="' . sprintf($this->urlSFSsearch, $checksDecoded['value']) . '">' . $checksDecoded['value'] . '</a>';
+		}
 		// No idea what triggered it, parse it out cleanly.  Could be debug data as well.
-		else
-		{
+		else {
 			$checks = '';
-			foreach ($checksDecoded as $ckey => $vkey)
-				foreach ($vkey as $key => $value)
+
+			foreach ($checksDecoded as $ckey => $vkey) {
+				foreach ($vkey as $key => $value) {
 					$checks .= ucfirst($key) . ':' . $value . '<br>';
+				}
+			}
 		}
 
 		return $checks;
@@ -761,20 +766,22 @@ class SFSL
 	public function getSFSLogPrepareEntryResult(array $row = []): string
 	{
 		// This tells us what it matched on exactly.
-		if (strpos($row['result'], ',') === false)
+		if (strpos($row['result'], ',') === false) {
 			return $row['result'];
+		}
 
 		$results = [];
-		foreach (array_filter(explode('|', $row['result'] . '|'), function ($match) {return !empty($match);}) as $match)
-		{
+
+		foreach (array_filter(explode('|', $row['result'] . '|'), function ($match) {return !empty($match);}) as $match) {
 			list($resultType, $resultMatch, $extra) = explode(',', $match . ',,,');
 			$res = sprintf($this->SFSclass->txt('sfs_log_matched_on'), $resultType, $resultMatch);
 
 			// If this was a IP ban, note it.
-			if ($resultType == 'ip' && !empty($extra))
+			if ($resultType == 'ip' && !empty($extra)) {
 				$res .= ' ' . $this->SFSclass->txt('sfs_log_auto_banned');
-			elseif ($resultType == 'username' && !empty($extra))
+			} elseif ($resultType == 'username' && !empty($extra)) {
 				$res .= ' ' . sprintf($this->SFSclass->txt('sfs_log_confidence'), $extra);
+			}
 
 			$results[] = $res;
 		}
@@ -795,11 +802,12 @@ class SFSL
 	 * @since 1.0
 	 * @uses hook_manage_logs - Hook SMF2.1
 	 * @uses setupModifyModifications - Injected SMF2.0
-	 * @return void No return is generated
 	 */
 	public function getSFSLogEntriesCount(string $query_string = '', array $query_params = []): int
 	{
-		$result = $this->smcFunc['db_query']('', '
+		$result = $this->smcFunc['db_query'](
+			'',
+			'
 			SELECT COUNT(*)
 			FROM {db_prefix}log_sfs AS l
 				LEFT JOIN {db_prefix}members AS mem ON (mem.id_member = l.id_member)
@@ -809,9 +817,9 @@ class SFSL
 					AND ' . $query_string : ''),
 			array_merge($query_params, [
 				'reg_group_id' => 0,
-			])
+			]),
 		);
-		list ($entry_count) = $this->smcFunc['db_fetch_row']($result);
+		list($entry_count) = $this->smcFunc['db_fetch_row']($result);
 		$this->smcFunc['db_free_result']($result);
 
 		return (int) $entry_count;
@@ -828,13 +836,14 @@ class SFSL
 	 */
 	private function getBaseUrl(): string
 	{
-		if (empty($this->adminLogURL))
-		{
-			if ($this->SFSclass->versionCheck('2.0', 'smf'))
+		if (empty($this->adminLogURL)) {
+			if ($this->SFSclass->versionCheck('2.0', 'smf')) {
 				$this->adminLogURL = $this->scripturl . '?action=admin;area=modsettings;sa=sfslog';
-			else
+			} else {
 				$this->adminLogURL = $this->scripturl . '?action=admin;area=logs;sa=sfslog';
+			}
 		}
+
 		return $this->adminLogURL;
 	}
 
@@ -846,16 +855,17 @@ class SFSL
 	 * @See SFSA::loadLogs
 	 * @version 1.5.0
 	 * @since 1.0
-	 * @return void No return is generated
 	 */
 	private function removeAllLogs(): void
 	{
-		$this->smcFunc['db_query']('', '
+		$this->smcFunc['db_query'](
+			'',
+			'
 			DELETE FROM {db_prefix}log_sfs
 			WHERE log_time < {int:twenty_four_hours_wait}',
 			[
 				'twenty_four_hours_wait' => time() - $this->hoursDisabled * 3600,
-			]
+			],
 		);
 	}
 
@@ -869,18 +879,19 @@ class SFSL
 	 * @See SFSA::loadLogs
 	 * @version 1.5.0
 	 * @since 1.0
-	 * @return void No return is generated
 	 */
 	private function removeLogs(array $entries): void
 	{
-		$this->smcFunc['db_query']('', '
+		$this->smcFunc['db_query'](
+			'',
+			'
 			DELETE FROM {db_prefix}log_sfs
 			WHERE id_sfs IN ({array_string:delete_actions})
 				AND log_time < {int:twenty_four_hours_wait}',
 			[
 				'twenty_four_hours_wait' => time() - $this->hoursDisabled * 3600,
 				'delete_actions' => $entries,
-			]
+			],
 		);
 	}
 
@@ -892,7 +903,6 @@ class SFSL
 	 * @CalledIn SMF 2.0, SMF 2.1
 	 * @version 1.5.0
 	 * @since 1.0
-	 * @return void No return is generated here.
 	 */
 	private function handleLogSearch(string &$url): void
 	{
@@ -917,8 +927,9 @@ class SFSL
 			'label' => $this->search_types[$this->search_params_type]['label'],
 		];
 
-		if (!empty($this->search_params))
+		if (!empty($this->search_params)) {
 			$url .= ';params=' . $this->search_params;
+		}
 	}
 
 	/**
@@ -933,13 +944,13 @@ class SFSL
 	private function handleLogSearchParams(): array
 	{
 		// If we have something to search for saved, get it back out.
-		if (!empty($_REQUEST['params']) && empty($_REQUEST['is_search']))
-		{
+		if (!empty($_REQUEST['params']) && empty($_REQUEST['is_search'])) {
 			$search_params = base64_decode(strtr($_REQUEST['params'], [' ' => '+']));
 			$search_params = $this->SFSclass->decodeJSON($search_params);
 
-			if (!empty($search_params))
+			if (!empty($search_params)) {
 				return $search_params;
+			}
 		}
 
 		return [];
@@ -962,7 +973,7 @@ class SFSL
 			'username' => ['sql' => 'l.username', 'label' => $this->SFSclass->txt('sfs_log_search_username')],
 			'email' => ['sql' => 'l.email', 'label' => $this->SFSclass->txt('sfs_log_search_email')],
 			'ip' => ['sql' => 'lm.ip', 'label' => $this->SFSclass->txt('sfs_log_search_ip')],
-			'ip2' => ['sql' => 'lm.ip2', 'label' => $this->SFSclass->txt('sfs_log_search_ip2')]
+			'ip2' => ['sql' => 'lm.ip2', 'label' => $this->SFSclass->txt('sfs_log_search_ip2')],
 		];
 	}
 
@@ -977,11 +988,14 @@ class SFSL
 	 */
 	private function handleLogSearchParamsString(): string
 	{
-		if (!empty($_REQUEST['search']) && ($this->search_params['string'] ?? '') != $_REQUEST['search'])
+		if (!empty($_REQUEST['search']) && ($this->search_params['string'] ?? '') != $_REQUEST['search']) {
 			return (string) $_REQUEST['search'];
-		elseif (isset($this->search_params['string']))
+		}
+
+		if (isset($this->search_params['string'])) {
 			return $this->search_params['string'];
-		else
+		}
+
 			return '';
 	}
 
@@ -996,13 +1010,18 @@ class SFSL
 	 */
 	private function handleLogSearchParamsType(): string
 	{
-		if (isset($_REQUEST['search_type']) && isset($this->search_types[$_REQUEST['search_type']]))
+		if (isset($_REQUEST['search_type'], $this->search_types[$_REQUEST['search_type']])) {
 			return (string) $_REQUEST['search_type'];
-		elseif (!empty($this->search_params['type']) && isset($this->search_types[$this->search_params['type']]))
+		}
+
+		if (!empty($this->search_params['type']) && isset($this->search_types[$this->search_params['type']])) {
 			return $this->search_params['type'];
-		elseif (isset($this->search_types[$this->sort_order]))
+		}
+
+		if (isset($this->search_types[$this->sort_order])) {
 			return $this->sort_order;
-		else
+		}
+
 			 return 'member';
 	}
 }

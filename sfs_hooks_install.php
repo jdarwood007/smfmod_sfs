@@ -8,15 +8,17 @@
  */
 
 // If we have found SSI.php and we are outside of SMF, then we are running standalone.
-if (file_exists(dirname(__FILE__) . '/SSI.php') && !defined('SMF'))
-	require_once(dirname(__FILE__) . '/SSI.php');
-elseif (file_exists(getcwd() . '/SSI.php') && !defined('SMF'))
-	require_once(getcwd() . '/SSI.php');
-elseif (!defined('SMF')) // If we are outside SMF and can't find SSI.php, then throw an error
+if (file_exists(dirname(__FILE__) . '/SSI.php') && !defined('SMF')) {
+	require_once dirname(__FILE__) . '/SSI.php';
+} elseif (file_exists(getcwd() . '/SSI.php') && !defined('SMF')) {
+	require_once getcwd() . '/SSI.php';
+} elseif (!defined('SMF')) { // If we are outside SMF and can't find SSI.php, then throw an error
 	die('<b>Error:</b> Cannot install - please verify you put this file in the same place as SMF\'s SSI.php.');
+}
 
-if (SMF == 'SSI')
+if (SMF == 'SSI') {
 	db_extend('packages');
+}
 
 $hooks = [
 	// Main sections.
@@ -31,17 +33,21 @@ $hooks = [
 	'integrate_manage_logs' => 'SFSL::hook_manage_logs',
 
 	// Profile Section.
-	'integrate_profile_areas' => 'SFSP::hook_pre_profile_areas'
+	'integrate_profile_areas' => 'SFSP::hook_pre_profile_areas',
 ];
-foreach ($hooks as $hook => $func)
+
+foreach ($hooks as $hook => $func) {
 	add_integration_function($hook, $func, true);
+}
 
 // Remove old hooks.
 $removeHooks = [
-	['integrate_manage_logs','SFSA::hook_manage_logs'],
-	['integrate_pre_include','$sourcedir/SFS.php'],
-	['integrate_admin_include','$sourcedir/SFS-Subs-Admin.php'],
-	['integrate_profile_areas','SFS::hook_pre_profile_areas']
+	['integrate_manage_logs', 'SFSA::hook_manage_logs'],
+	['integrate_pre_include', '$sourcedir/SFS.php'],
+	['integrate_admin_include', '$sourcedir/SFS-Subs-Admin.php'],
+	['integrate_profile_areas', 'SFS::hook_pre_profile_areas'],
 ];
-foreach ($removeHooks as $remove)
+
+foreach ($removeHooks as $remove) {
 	remove_integration_function($remove[0], $remove[1]);
+}

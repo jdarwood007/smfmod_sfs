@@ -6,3 +6,8 @@
 sd_plugins_lang/SDPlugin*.php
 sd_plugins_source/*
 css/helpdesk_custom.css
+
+# Deloper #
+###########
+/vendor/
+.php-cs-fixer.cache

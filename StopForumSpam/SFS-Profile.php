@@ -35,8 +35,9 @@ class SFSP
 	 */
 	public static function selfClass(): self
 	{
-		if (!isset($GLOBALS['context']['instances'][__CLASS__]))
+		if (!isset($GLOBALS['context']['instances'][__CLASS__])) {
 			$GLOBALS['context']['instances'][__CLASS__] = new self();
+		}
 
 		return $GLOBALS['context']['instances'][__CLASS__];
 	}
@@ -48,15 +49,16 @@ class SFSP
 	 * @CalledIn SMF 2.0, SMF 2.1
 	 * @version 1.5.0
 	 * @since 1.0
-	 * @return void No return is generated
 	 */
 	public function __construct()
 	{
 		$this->scripturl = $GLOBALS['scripturl'];
-		foreach (['context', 'smcFunc', 'txt', 'modSettings', 'user_info'] as $f)
-			$this->{$f} = &$GLOBALS[$f];
 
-		$this->SFSclass = &$this->smcFunc['classSFS'];			
+		foreach (['context', 'smcFunc', 'txt', 'modSettings', 'user_info'] as $f) {
+			$this->{$f} = &$GLOBALS[$f];
+		}
+
+		$this->SFSclass = &$this->smcFunc['classSFS'];
 	}
 
 	/**
@@ -70,7 +72,6 @@ class SFSP
 	 * @version 1.1
 	 * @since 1.1
 	 * @uses integrate_pre_profile_areas - Hook SMF2.1
-	 * @return void the passed $profile_areas is modified.
 	 */
 	public static function hook_pre_profile_areas(array &$profile_areas): void
 	{
@@ -87,7 +88,6 @@ class SFSP
 	 * @version 1.5.0
 	 * @since 1.1
 	 * @uses integrate_pre_profile_areas - Hook SMF2.1
-	 * @return void the passed $profile_areas is modified.
 	 */
 	public function setupProfileMenu(array &$profile_areas): void
 	{
@@ -103,8 +103,7 @@ class SFSP
 		];
 
 		// SMF 2.0 can't call objects or classes.
-		if ($this->SFSclass->versionCheck('2.0', 'smf'))
-		{
+		if ($this->SFSclass->versionCheck('2.0', 'smf')) {
 			function ProfileTrackSFS20(int $memID)
 			{
 				SFSP::ProfileTrackSFS($memID);
@@ -122,7 +121,6 @@ class SFSP
 	 * @CalledIn SMF 2.1
 	 * @version 1.1
 	 * @since 1.1
-	 * @return void the passed $profile_areas is modified.
 	 */
 	public static function ProfileTrackSFS(int $memID): void
 	{
@@ -139,7 +137,6 @@ class SFSP
 	 * @version 1.5.0
 	 * @since 1.1
 	 * @uses integrate_pre_profile_areas - Hook SMF2.1
-	 * @return void the passed $profile_areas is modified.
 	 */
 	public function loadUser(int $memID): void
 	{
@@ -156,7 +153,6 @@ class SFSP
 	 * @CalledIn SMF 2.1
 	 * @version 1.5.0
 	 * @since 1.1
-	 * @return void the passed $profile_areas is modified.
 	 */
 	public function TrackSFS(int $memID): void
 	{
@@ -170,8 +166,7 @@ class SFSP
 		$cache_key = 'sfs_check_member-' . $this->memID;
 
 		// Do we have a message?
-		if (isset($_GET['msg']) && intval($_GET['msg']) > 0)
-		{
+		if (isset($_GET['msg']) && intval($_GET['msg']) > 0) {
 			$row = $this->TrackSFSMessage((int) $_GET['msg']);
 			$cache_key .= '-msg' . ((int) $_GET['msg']);
 		}
@@ -179,8 +174,7 @@ class SFSP
 		$this->context['reason'] = $this->smcFunc['htmlspecialchars']($row['post_body'] ?? '');
 
 		// Are we submitting this?
-		if ($this->context['sfs_allow_submit'] && (isset($_POST['sfs_submit']) || isset($_POST['sfs_submitban'])))
-		{
+		if ($this->context['sfs_allow_submit'] && (isset($_POST['sfs_submit']) || isset($_POST['sfs_submitban']))) {
 			checkSession();
 			$this->SFSclass->validateToken($this->context['token_check'], 'post');
 
@@ -188,14 +182,13 @@ class SFSP
 				'username' => $row['poster_name'] ?? $this->user_profile['real_name'],
 				'email' => $row['poster_email'] ?? $this->user_profile['email_address'],
 				'ip_addr' => $row['poster_ip'] ?? $this->user_profile['member_ip'],
-				'api_key' => $this->modSettings['sfs_apikey']
+				'api_key' => $this->modSettings['sfs_apikey'],
 			];
 			$this->TrackSFSSubmit($data);
 		}
 
 		// Check if we have this info.
-		if (($cache = cache_get_data($cache_key)) === null || ($response = $this->SFSclass->decodeJSON((string) $cache)) === null)
-		{
+		if (($cache = cache_get_data($cache_key)) === null || ($response = $this->SFSclass->decodeJSON((string) $cache)) === null) {
 			$checks = [
 				['username' => $row['poster_name'] ?? $this->user_profile['real_name']],
 				['email' => $row['poster_email'] ?? $this->user_profile['email_address']],
@@ -212,11 +205,12 @@ class SFSP
 		$this->context['sfs_checks'] = $response;
 		unset($this->context['sfs_checks']['success']);
 
-		if ($this->context['sfs_allow_submit'])
-		{
+		if ($this->context['sfs_allow_submit']) {
 			$this->context['sfs_submit_url'] = $this->scripturl . '?action=profile;area=sfs;u=' . $memID;
-			if (is_null($this->SFSclass->createToken($this->context['token_check'], 'post')))
+
+			if (is_null($this->SFSclass->createToken($this->context['token_check'], 'post'))) {
 				unset($this->context['token_check']);
+			}
 		}
 
 		$this->SFSclass->loadTemplate('StopForumSpam');
@@ -236,7 +230,9 @@ class SFSP
 	{
 		$row = null;
 
-		$request = $this->smcFunc['db_query']('', '
+		$request = $this->smcFunc['db_query'](
+			'',
+			'
 			SELECT poster_name, poster_email, poster_ip, body
 			FROM {db_prefix}messages
 			WHERE id_msg = {int:id_msg}
@@ -249,10 +245,11 @@ class SFSP
 			[
 				'id_msg' => $id_msg,
 				'id_member' => $this->memID,
-				'actor_is_admin' => $this->context['user']['is_admin'] ? 1 : 0
-			]);
-		if ($this->smcFunc['db_num_rows']($request) == 1)
-		{
+				'actor_is_admin' => $this->context['user']['is_admin'] ? 1 : 0,
+			],
+		);
+
+		if ($this->smcFunc['db_num_rows']($request) == 1) {
 			$row = $this->smcFunc['db_fetch_assoc']($request);
 			$row['poster_ip'] = inet_dtop($row['poster_ip']);
 		}
@@ -275,17 +272,19 @@ class SFSP
 		$post_data = http_build_query($data, '', '&');
 
 		// SMF 2.0 has the fetch_web_data in the Subs-Packages, 2.1 it is in Subs.php.
-		if ($this->SFSclass->versionCheck('2.0', 'smf'))
+		if ($this->SFSclass->versionCheck('2.0', 'smf')) {
 			$this->SFSclass->loadSources('Subs-Package');
+		}
 
 		// Now we have a URL, lets go get it.
 		$result = fetch_web_data('https://www.stopforumspam.com/add', $post_data);
 
-		if ($result === false || strpos($result, 'data submitted successfully') === false)
+		if ($result === false || strpos($result, 'data submitted successfully') === false) {
 			$this->context['submission_failed'] = $this->SFSclass->txt('sfs_submission_error');
-		elseif (isset($_POST['sfs_submitban']))
+		} elseif (isset($_POST['sfs_submitban'])) {
 			redirectexit($this->scripturl . '?action=admin;area=ban;sa=add;u=' . $this->memID);
-		else
+		} else {
 			$this->context['submission_success'] = $this->SFSclass->txt('sfs_submission_success');
+		}
 	}
 }

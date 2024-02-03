@@ -45,8 +45,9 @@ class SFSA
 	 */
 	public static function selfClass(): self
 	{
-		if (!isset($GLOBALS['context']['instances'][__CLASS__]))
+		if (!isset($GLOBALS['context']['instances'][__CLASS__])) {
 			$GLOBALS['context']['instances'][__CLASS__] = new self();
+		}
 
 		return $GLOBALS['context']['instances'][__CLASS__];
 	}
@@ -58,15 +59,16 @@ class SFSA
 	 * @CalledIn SMF 2.0, SMF 2.1
 	 * @version 1.5.0
 	 * @since 1.0
-	 * @return void No return is generated
 	 */
 	public function __construct()
 	{
 		$this->scripturl = $GLOBALS['scripturl'];
-		foreach (['context', 'smcFunc', 'txt', 'modSettings', 'user_info'] as $f)
-			$this->{$f} = &$GLOBALS[$f];
 
-		$this->SFSclass = &$this->smcFunc['classSFS'];			
+		foreach (['context', 'smcFunc', 'txt', 'modSettings', 'user_info'] as $f) {
+			$this->{$f} = &$GLOBALS[$f];
+		}
+
+		$this->SFSclass = &$this->smcFunc['classSFS'];
 	}
 
 	/**
@@ -81,7 +83,6 @@ class SFSA
 	 * @since 1.0
 	 * @uses integrate__admin_areas - Hook SMF2.0
 	 * @uses integrate__admin_areas - Hook SMF2.1
-	 * @return void No return is generated
 	 */
 	public static function hook_admin_areas(array &$admin_areas): void
 	{
@@ -100,31 +101,27 @@ class SFSA
 	 * @since 1.0
 	 * @uses integrate__admin_areas - Hook SMF2.0
 	 * @uses integrate__admin_areas - Hook SMF2.1
-	 * @return void No return is generated
 	 */
 	private function setupAdminAreas(array &$admin_areas): void
 	{
 		// The main config is the same.
 		$this->adminPageURL = $this->scripturl . '?action=admin;area=modsettings;sa=sfs';
 		$admin_areas['config']['areas']['modsettings']['subsections']['sfs'] = [
-			$this->SFSclass->txt('sfs_admin_area')
+			$this->SFSclass->txt('sfs_admin_area'),
 		];
 
 		// Add the menu item.
-		if ($this->SFSclass->versionCheck('2.0', 'smf'))
-		{
+		if ($this->SFSclass->versionCheck('2.0', 'smf')) {
 			$this->adminLogURL = $this->scripturl . '?action=admin;area=modsettings;sa=sfslog';
 			$this->adminTestURL = $this->scripturl . '?action=admin;area=modsettings;sa=sfstest';
 
 			$admin_areas['config']['areas']['modsettings']['subsections']['sfslog'] = [
-				$this->SFSclass->txt('sfs_admin_logs')
+				$this->SFSclass->txt('sfs_admin_logs'),
 			];
 			$admin_areas['config']['areas']['modsettings']['subsections']['sfstest'] = [
-				$this->SFSclass->txt('sfs_admin_test')
+				$this->SFSclass->txt('sfs_admin_test'),
 			];
-		}
-		else
-		{
+		} else {
 			$this->adminLogURL = $this->scripturl . '?action=admin;area=logs;sa=sfslog';
 			$this->adminTestURL = $this->scripturl . '?action=admin;area=regcenter;sa=sfstest';
 
@@ -132,7 +129,7 @@ class SFSA
 				$this->SFSclass->txt('sfs_admin_logs'),
 			];
 			$admin_areas['members']['areas']['regcenter']['subsections']['sfstest'] = [
-				$this->SFSclass->txt('sfs_admin_test')
+				$this->SFSclass->txt('sfs_admin_test'),
 			];
 		}
 	}
@@ -150,7 +147,6 @@ class SFSA
 	 * @since 1.0
 	 * @uses integrate_modify_modifications - Hook SMF2.0
 	 * @uses integrate_modify_modifications - Hook SMF2.1
-	 * @return void No return is generated
 	 */
 	public static function hook_modify_modifications(array &$subActions): void
 	{
@@ -169,15 +165,13 @@ class SFSA
 	 * @since 1.0
 	 * @uses integrate_modify_modifications - Hook SMF2.0
 	 * @uses integrate_modify_modifications - Hook SMF2.1
-	 * @return void No return is generated
 	 */
 	private function setupModifyModifications(array &$subActions): void
 	{
 		$subActions['sfs'] = 'SFSA::startupAdminConfiguration';
 
 		// Only in SMF 2.0 do we drop logs here.
-		if ($this->SFSclass->versionCheck('2.0', 'smf'))
-		{
+		if ($this->SFSclass->versionCheck('2.0', 'smf')) {
 			$this->SFSclass->loadSources(['SFS-Logs']);
 			$subActions['sfslog'] = 'SFSL::startupLogs';
 			$subActions['sfstest'] = 'SFSA::startupTest';
@@ -196,7 +190,6 @@ class SFSA
 	 * @since 1.0
 	 * @uses integrate_modify_modifications - Hook SMF2.0
 	 * @uses integrate_modify_modifications - Hook SMF2.1
-	 * @return void No return is generated
 	 */
 	public static function startupAdminConfiguration(bool $return_config = false)
 	{
@@ -214,18 +207,19 @@ class SFSA
 	 * @since 1.0
 	 * @uses integrate_modify_modifications - Hook SMF2.0
 	 * @uses integrate_modify_modifications - Hook SMF2.1
-	 * @return void No return is generated
 	 */
 	private function setupSFSConfiguration(bool $return_config = false): array
 	{
 		$config_vars = $this->getConfiguration();
 
-		if ($return_config)
+		if ($return_config) {
 			return $config_vars;
+		}
 
 		// Saving?
-		if (isset($_GET['save']))
+		if (isset($_GET['save'])) {
 			$this->saveConfiguration($config_vars);
+		}
 
 		$this->context['post_url'] = $this->adminPageURL . ';save';
 		prepareDBSettingContext($config_vars);
@@ -242,62 +236,61 @@ class SFSA
 	 * @CalledIn SMF 2.0, SMF 2.1
 	 * @version 1.5.0
 	 * @since 1.5.0
-	 * @return void No return is generated
 	 */
 	private function getConfiguration(): array
 	{
 		return [
-				['title', 'sfsgentitle', 'label' => $this->SFSclass->txt('sfs_general_title')],
+			['title', 'sfsgentitle', 'label' => $this->SFSclass->txt('sfs_general_title')],
 
-				['check', 'sfs_enabled'],
-				['int', 'sfs_expire'],
+			['check', 'sfs_enabled'],
+			['int', 'sfs_expire'],
 			'',
-				['select', 'sfs_required', [
-					'any' => $this->SFSclass->txt('sfs_required_any'),
-					'email|ip' => $this->SFSclass->txt('sfs_required_email_ip'),
-					'email|username' => $this->SFSclass->txt('sfs_required_email_username'),
-					'username|ip' => $this->SFSclass->txt('sfs_required_username_ip'),
-				]],
+			['select', 'sfs_required', [
+				'any' => $this->SFSclass->txt('sfs_required_any'),
+				'email|ip' => $this->SFSclass->txt('sfs_required_email_ip'),
+				'email|username' => $this->SFSclass->txt('sfs_required_email_username'),
+				'username|ip' => $this->SFSclass->txt('sfs_required_username_ip'),
+			]],
 			'',
-				['check', 'sfs_emailcheck'],
-				['check', 'sfs_usernamecheck'],
-				['float', 'sfs_username_confidence', 'step' => '0.01'],
-				['check', 'sfs_ipcheck'],
-				['check', 'sfs_ipcheck_autoban'],
+			['check', 'sfs_emailcheck'],
+			['check', 'sfs_usernamecheck'],
+			['float', 'sfs_username_confidence', 'step' => '0.01'],
+			['check', 'sfs_ipcheck'],
+			['check', 'sfs_ipcheck_autoban'],
 			'',
-				['select', 'sfs_region', $this->SFSclass->sfsServerMapping('config')],
+			['select', 'sfs_region', $this->SFSclass->sfsServerMapping('config')],
 			'',
-				['check', 'sfs_wildcard_email'],
-				['check', 'sfs_wildcard_username'],
-				['check', 'sfs_wildcard_ip'],
+			['check', 'sfs_wildcard_email'],
+			['check', 'sfs_wildcard_username'],
+			['check', 'sfs_wildcard_ip'],
 			'',
-				['select', 'sfs_tor_check', [
-					0 => $this->SFSclass->txt('sfs_tor_check_block'),
-					1 => $this->SFSclass->txt('sfs_tor_check_ignore'),
-					2 => $this->SFSclass->txt('sfs_tor_check_bad'),
-				]],
+			['select', 'sfs_tor_check', [
+				0 => $this->SFSclass->txt('sfs_tor_check_block'),
+				1 => $this->SFSclass->txt('sfs_tor_check_ignore'),
+				2 => $this->SFSclass->txt('sfs_tor_check_bad'),
+			]],
 			'',
-				['check', 'sfs_enablesubmission'],
-				['text', 'sfs_apikey'],
+			['check', 'sfs_enablesubmission'],
+			['text', 'sfs_apikey'],
 			'',
-				['title', 'sfsverftitle', 'label' => $this->SFSclass->txt('sfs_verification_title')],
-				['desc', 'sfsverfdesc', 'label' => $this->SFSclass->txt('sfs_verification_desc')],
-				['select', 'sfs_verification_options', [
-					'post' => $this->SFSclass->txt('sfs_verification_options_post'),
-					'report' => $this->SFSclass->txt('sfs_verification_options_report'),
-					'search' => $this->SFSclass->txt('sfs_verification_options_search'),
-				], 'multiple' => true],			
-				['text', 'sfs_verification_options_extra', 'subtext' => $this->SFSclass->txt('sfs_verification_options_extra_subtext')],
+			['title', 'sfsverftitle', 'label' => $this->SFSclass->txt('sfs_verification_title')],
+			['desc', 'sfsverfdesc', 'label' => $this->SFSclass->txt('sfs_verification_desc')],
+			['select', 'sfs_verification_options', [
+				'post' => $this->SFSclass->txt('sfs_verification_options_post'),
+				'report' => $this->SFSclass->txt('sfs_verification_options_report'),
+				'search' => $this->SFSclass->txt('sfs_verification_options_search'),
+			], 'multiple' => true],
+			['text', 'sfs_verification_options_extra', 'subtext' => $this->SFSclass->txt('sfs_verification_options_extra_subtext')],
 
 			'',
-				['select', 'sfs_verOptionsMembers', [
-					'post' => $this->SFSclass->txt('sfs_verification_options_post'),
-					'search' => $this->SFSclass->txt('sfs_verification_options_search'),
-				], 'multiple' => true],
-				['text', 'sfs_verOptionsMemExtra', 'subtext' => $this->SFSclass->txt('sfs_verification_options_extra_subtext')],
-				['int', 'sfs_verfOptMemPostThreshold'],
+			['select', 'sfs_verOptionsMembers', [
+				'post' => $this->SFSclass->txt('sfs_verification_options_post'),
+				'search' => $this->SFSclass->txt('sfs_verification_options_search'),
+			], 'multiple' => true],
+			['text', 'sfs_verOptionsMemExtra', 'subtext' => $this->SFSclass->txt('sfs_verification_options_extra_subtext')],
+			['int', 'sfs_verfOptMemPostThreshold'],
 			'',
-				['check', 'sfs_log_debug'],
+			['check', 'sfs_log_debug'],
 		];
 	}
 
@@ -310,7 +303,6 @@ class SFSA
 	 * @CalledIn SMF 2.0, SMF 2.1
 	 * @version 1.5.0
 	 * @since 1.5.0
-	 * @return void No return is generated
 	 */
 	private function saveConfiguration(array $config_vars): void
 	{
@@ -319,8 +311,7 @@ class SFSA
 		checkSession();
 
 		// If we are automatically banning IPs, make sure we have a ban group.
-		if (isset($_POST['sfs_ipcheck_autoban']) && empty($this->modSettings['sfs_ipcheck_autoban_group']))
-		{
+		if (isset($_POST['sfs_ipcheck_autoban']) && empty($this->modSettings['sfs_ipcheck_autoban_group'])) {
 			$this->SFSclass->loadSources('SFS-Bans');
 			SFSB::AdminCreateBanGroup(true);
 		}
@@ -343,7 +334,6 @@ class SFSA
 	 * @version 1.5.0
 	 * @since 1.4.0
 	 * @uses integrate_manage_registrations - Hook SMF2.1
-	 * @return void No return is generated
 	 */
 	public static function hook_manage_registrations(array &$subActions): bool
 	{
@@ -359,15 +349,15 @@ class SFSA
 	 * @See SFSA::startupTest
 	 * @version 1.5.0
 	 * @since 1.4.0
-	 * @return void No return is generated
 	 */
 	public function AddToRegCenterMenu(array &$subActions): bool
 	{
 		// Add our logs sub action.
 		$subActions['sfstest'] = ['SFSA::startupTest', 'admin_forum'];
 
-		if (isset($_REQUEST['sa']) && $_REQUEST['sa'] == 'sfstest' && allowedTo('admin_forum'))
+		if (isset($_REQUEST['sa']) && $_REQUEST['sa'] == 'sfstest' && allowedTo('admin_forum')) {
 			$this->context['sub_action'] = 'sfstest';
+		}
 
 		$this->context[$this->context['admin_menu_name']]['tab_data']['tabs']['sfstest'] = [
 			'description' => $this->SFSclass->txt('sfs_admin_test_desc'),
@@ -389,7 +379,6 @@ class SFSA
 	 * @since 1.4.0
 	 * @uses hook_manage_registrations - Hook SMF2.1
 	 * @uses setupModifyModifications - Injected SMF2.0
-	 * @return void No return is generated
 	 */
 	public static function startupTest(bool $return_config = false): array
 	{
@@ -408,13 +397,13 @@ class SFSA
 	 * @since 1.4.0
 	 * @uses hook_manage_registrations - Hook SMF2.1
 	 * @uses setupModifyModifications - Injected SMF2.0
-	 * @return void No return is generated
 	 */
 	public function loadTestAPI(bool $return_config = false): array
 	{
 		// No Configs.
-		if ($return_config)
+		if ($return_config) {
 			return [];
+		}
 
 		$this->context['token_check'] = 'sfs_testapi';
 		$this->SFSclass->loadLanguage();
@@ -424,16 +413,19 @@ class SFSA
 		$this->context['sfs_checks'] = $this->loadTestApiChecks();
 
 		// Sending the data?
-		if ($this->context['test_sent'])
+		if ($this->context['test_sent']) {
 			$this->peformTestApiCheck();
+		}
 
 		// Load our template.
 		$this->SFSclass->loadTemplate('StopForumSpam');
 		$this->context['sub_template'] = 'sfsa_testapi';
 
 		$this->context['sfs_test_url'] = $this->adminTestURL;
-		if (!$this->SFSclass->createToken($this->context['token_check'], 'post'))
+
+		if (!$this->SFSclass->createToken($this->context['token_check'], 'post')) {
 			unset($this->context['token_check']);
+		}
 
 		return [];
 	}
@@ -454,21 +446,21 @@ class SFSA
 				0 => [
 					'enabled' => !empty($this->modSettings['sfs_usernamecheck']),
 					'value' => !empty($_POST['username']) ? $this->smcFunc['htmlspecialchars']($_POST['username']) : $this->user_info['name'],
-					'results' => null
+					'results' => null,
 				],
 			],
 			'email' => [
 				0 => [
 					'enabled' => !empty($this->modSettings['sfs_emailcheck']),
 					'value' => !empty($_POST['email']) ? $this->smcFunc['htmlspecialchars']($_POST['email']) : $this->user_info['email'],
-					'results' => null
+					'results' => null,
 				],
 			],
 			'ip' => [
 				0 => [
 					'enabled' => !empty($this->modSettings['sfs_ipcheck']),
 					'value' => !empty($_POST['ip']) ? $this->smcFunc['htmlspecialchars']($_POST['ip']) : $this->user_info['ip'],
-					'results' => null
+					'results' => null,
 				],
 			],
 		];
@@ -491,19 +483,21 @@ class SFSA
 		$username = $this->smcFunc['htmlspecialchars']($_POST['username']);
 		$email = $this->smcFunc['htmlspecialchars']($_POST['email']);
 		$ip = $this->smcFunc['htmlspecialchars']($_POST['ip']);
-			
+
 		$response = $this->SFSclass->SendSFS([
-				['username' => $username],
-				['email' => $email],
-				['ip' => $ip],
+			['username' => $username],
+			['email' => $email],
+			['ip' => $ip],
 		], 'test');
 
 		// No checks found? Can't do this.
-		if (empty($response) || !is_array($response) || empty($response['success']))
+		if (empty($response) || !is_array($response) || empty($response['success'])) {
 			$this->context['test_api_error'] = $this->SFSclass->txt('sfs_request_failure_nodata');
-		else
+		} else {
 			// Parse all the responses out.
-			foreach ($this->context['sfs_checks'] as $key => &$res)
+			foreach ($this->context['sfs_checks'] as $key => &$res) {
 				$res[0] += $response[$key][0] ?? [];
+			}
+		}
 	}
 }

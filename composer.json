@@ -1,0 +1,19 @@
+{
+    "name": "jdarwood007/smfmod_sfs",
+    "description": "Stop Forum Spam API support for SMF.",
+    "type": "smf-mod",
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "dev-master"
+    },
+    "license": "BSD 3-Clause License",
+    "authors": [
+        {
+            "name": "jdarwood007"
+        }
+    ],
+    "scripts": {
+        "lint": "php-cs-fixer check --diff --config .php-cs-fixer.dist.php --path-mode=intersection $(git diff --name-only \"*.php\")",
+        "lint-fix": "php-cs-fixer fix -v --config .php-cs-fixer.dist.php --path-mode=intersection $(git diff --name-only \"*.php\")"
+    },
+    "minimum-stability": "dev"
+}
