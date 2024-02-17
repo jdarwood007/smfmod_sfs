@@ -454,7 +454,7 @@ class SFS
 		$result = true;
 
 		foreach ($requiredChecks as $key) {
-			$test = call_user_func([$this, 'sfsCheck_' . $key], $response[$key], $area);
+			$test = call_user_func([$this, 'sfsCheck_' . $key], $response[$key] ?? [], $area);
 			$requestBlocked .= !empty($test) ? $test . '|' : '';
 			$result &= !empty($test);
 		}
