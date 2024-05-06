@@ -914,7 +914,7 @@ class SFS
 			2 => [
 				'region' => 'eu',
 				'label' => $this->txt('sfs_region_eu'),
-				'host' => 'eruope.stopforumspam.org',
+				'host' => 'europe.stopforumspam.org',
 			],
 		];
 
