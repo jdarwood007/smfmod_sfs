@@ -3,7 +3,7 @@
 <package-info xmlns="http://www.simplemachines.org/xml/package-info" xmlns:smf="http://www.simplemachines.org/">
 	<id>SleePy:StopForumSpam</id>
 	<name>Stop Forum Spam</name>
-	<version>1.5.4</version>
+	<version>1.5.5</version>
 	<type>modification</type>
 
 	<!-- 2.0 has no support for hooks -->
@@ -121,7 +121,7 @@
 		<remove-file name="$themedir/images/admin/sfs.webp" />
 	</uninstall>
 
-	<upgrade from="1.0-1.5.3" for="2.1.*">
+	<upgrade from="1.0-1.5.4" for="2.1.*">
 		<require-file name="language/StopForumSpam.english.php" destination="$themes_dir/default/languages" />
         <require-file name="language/StopForumSpam.finnish.php" destination="$themes_dir/default/languages" />
 
@@ -154,7 +154,7 @@
 		<require-file name="sfs.webp" destination="$themedir/images/admin" />
 	</upgrade>
 
-	<upgrade from="1.0-1.5.3" for="2.0.*">
+	<upgrade from="1.0-1.5.4" for="2.0.*">
 		<code type="file">sfs_hooks_install.php</code>
 
 		<require-file name="language/StopForumSpam.english.php" destination="$themes_dir/default/languages" />
