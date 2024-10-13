@@ -8,6 +8,18 @@
 
 	<!-- 2.0 has no support for hooks -->
 	<install for="2.0.*">
+		<code type="inline"><![CDATA[<?php
+			define('REQUIRED_PHP_VERSION', '8');
+			if (version_compare(PHP_VERSION, REQUIRED_PHP_VERSION, '<'))
+				fatal_error(
+					sprintf(
+						'This mod requires a minimum of PHP %s in order to function. (You are currently running PHP %s)',
+						REQUIRED_PHP_VERSION,
+						PHP_VERSION
+					),
+					false
+				);
+		?>]]></code>
 		<readme type="file" parsebbc="true">README.bbc</readme>
 		<database>install_sfs.php</database>
 		<code type="file">sfs_hooks_install.php</code>
@@ -47,6 +59,18 @@
 	</uninstall>
 
 	<install for="2.1.*">
+		<code type="inline"><![CDATA[<?php
+			define('REQUIRED_PHP_VERSION', '8');
+			if (version_compare(PHP_VERSION, REQUIRED_PHP_VERSION, '<'))
+				fatal_error(
+					sprintf(
+						'This mod requires a minimum of PHP %s in order to function. (You are currently running PHP %s)',
+						REQUIRED_PHP_VERSION,
+						PHP_VERSION
+					),
+					false
+				);
+		?>]]></code>
 		<readme type="file" parsebbc="true">README.bbc</readme>
 		<database>install_sfs.php</database>
 
@@ -122,6 +146,18 @@
 	</uninstall>
 
 	<upgrade from="1.0-1.5.4" for="2.1.*">
+		<code type="inline"><![CDATA[<?php
+			define('REQUIRED_PHP_VERSION', '8');
+			if (version_compare(PHP_VERSION, REQUIRED_PHP_VERSION, '<'))
+				fatal_error(
+					sprintf(
+						'This mod requires a minimum of PHP %s in order to function. (You are currently running PHP %s)',
+						REQUIRED_PHP_VERSION,
+						PHP_VERSION
+					),
+					false
+				);
+		?>]]></code>
 		<require-file name="language/StopForumSpam.english.php" destination="$themes_dir/default/languages" />
         <require-file name="language/StopForumSpam.finnish.php" destination="$themes_dir/default/languages" />
 
@@ -155,6 +191,18 @@
 	</upgrade>
 
 	<upgrade from="1.0-1.5.4" for="2.0.*">
+		<code type="inline"><![CDATA[<?php
+			define('REQUIRED_PHP_VERSION', '8');
+			if (version_compare(PHP_VERSION, REQUIRED_PHP_VERSION, '<'))
+				fatal_error(
+					sprintf(
+						'This mod requires a minimum of PHP %s in order to function. (You are currently running PHP %s)',
+						REQUIRED_PHP_VERSION,
+						PHP_VERSION
+					),
+					false
+				);
+		?>]]></code>
 		<code type="file">sfs_hooks_install.php</code>
 
 		<require-file name="language/StopForumSpam.english.php" destination="$themes_dir/default/languages" />
