@@ -21,7 +21,7 @@ elseif (!defined('SMF'))
 	die('<b>Error:</b> Cannot uninstall - please verify you put this file in the same place as SMF\'s SSI.php.');
 }
 
-// If you upgraded from 2.1.0,
+// If you upgraded from 2.0.0,
 if (version_compare(SMF_VERSION, '2.1.0', '>=') && substr($modSettings['sfs_verification_options'], 0, 2) === 'a:') {
 	$converted = json_encode(safe_unserialize($modSettings['sfs_verification_options']));
 	
