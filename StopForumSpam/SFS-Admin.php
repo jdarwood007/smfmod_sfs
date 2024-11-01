@@ -203,7 +203,7 @@ class SFSA
 	 *
 	 * @internal
 	 * @CalledIn SMF 2.0, SMF 2.1
-	 * @version 1.5.0
+	 * @version 1.5.7
 	 * @since 1.0
 	 * @uses integrate_modify_modifications - Hook SMF2.0
 	 * @uses integrate_modify_modifications - Hook SMF2.1
@@ -211,6 +211,11 @@ class SFSA
 	private function setupSFSConfiguration(bool $return_config = false): array
 	{
 		$config_vars = $this->getConfiguration();
+
+		// A bug or upgrade from another version results in serialization of older settings.
+		if (!$this->SFSclass->versionCheck('2.0', 'smf') && substr($this->modSettings['sfs_verification_options'], 0, 2) === 'a:') {
+			$this->modSettings['sfs_verification_options'] = json_encode(safe_unserialize($this->modSettings['sfs_verification_options']));			
+		}
 
 		if ($return_config) {
 			return $config_vars;

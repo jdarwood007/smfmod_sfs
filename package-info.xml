@@ -3,7 +3,7 @@
 <package-info xmlns="http://www.simplemachines.org/xml/package-info" xmlns:smf="http://www.simplemachines.org/">
 	<id>SleePy:StopForumSpam</id>
 	<name>Stop Forum Spam</name>
-	<version>1.5.6</version>
+	<version>1.5.7</version>
 	<type>modification</type>
 
 	<!-- 2.0 has no support for hooks -->
@@ -23,6 +23,7 @@
 		<readme type="file" parsebbc="true">README.bbc</readme>
 		<database>install_sfs.php</database>
 		<code type="file">sfs_hooks_install.php</code>
+		<code type="file">upgrade_sfs.php</code>
 		<modification>install_smf20.xml</modification>
 
 		<require-file name="StopForumSpam.php" destination="$sourcedir" />
@@ -73,6 +74,7 @@
 		?>]]></code>
 		<readme type="file" parsebbc="true">README.bbc</readme>
 		<database>install_sfs.php</database>
+		<code type="file">upgrade_sfs.php</code>
 
 		<require-file name="StopForumSpam.php" destination="$sourcedir" />
 		<require-dir name="StopForumSpam" destination="$sourcedir" />
@@ -145,7 +147,7 @@
 		<remove-file name="$themedir/images/admin/sfs.webp" />
 	</uninstall>
 
-	<upgrade from="1.0-1.5.5" for="2.1.*">
+	<upgrade from="1.0-1.5.6" for="2.1.*">
 		<code type="inline"><![CDATA[<?php
 			define('REQUIRED_PHP_VERSION', '8');
 			if (version_compare(PHP_VERSION, REQUIRED_PHP_VERSION, '<'))
@@ -158,6 +160,8 @@
 					false
 				);
 		?>]]></code>
+		<code type="file">upgrade_sfs.php</code>
+
 		<require-file name="language/StopForumSpam.english.php" destination="$themes_dir/default/languages" />
         <require-file name="language/StopForumSpam.finnish.php" destination="$themes_dir/default/languages" />
 
@@ -190,7 +194,7 @@
 		<require-file name="sfs.webp" destination="$themedir/images/admin" />
 	</upgrade>
 
-	<upgrade from="1.0-1.5.5" for="2.0.*">
+	<upgrade from="1.0-1.5.6" for="2.0.*">
 		<code type="inline"><![CDATA[<?php
 			define('REQUIRED_PHP_VERSION', '8');
 			if (version_compare(PHP_VERSION, REQUIRED_PHP_VERSION, '<'))
@@ -203,6 +207,7 @@
 					false
 				);
 		?>]]></code>
+		<code type="file">upgrade_sfs.php</code>
 		<code type="file">sfs_hooks_install.php</code>
 
 		<require-file name="language/StopForumSpam.english.php" destination="$themes_dir/default/languages" />

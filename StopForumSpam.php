@@ -932,7 +932,7 @@ class SFS
 	 *
 	 * @internal
 	 * @CalledIn SMF 2.0, SMF 2.1
-	 * @version 1.5.0
+	 * @version 1.5.7
 	 * @since 1.0
 	 * @return array The list of servers.
 	 */
@@ -941,8 +941,13 @@ class SFS
 		$optionsKey = $this->user_info['is_guest'] ? 'sfs_verification_options' : 'sfs_verOptionsMembers';
 		$optionsKeyExtra = $this->user_info['is_guest'] ? 'sfs_verification_options_extra' : 'sfs_verOptionsMemExtra';
 
-		// Standard options.
-		$options = $this->Decode($this->modSettings[$optionsKey] ?? '');
+		// A bug or upgrade from another version results in serialization of older settings.
+		if (substr($this->modSettings[$optionsKey], 0, 2) === 'a:') {
+			$options = safe_unserialize($data);			
+		} else {
+			// Standard options.		
+			$options = $this->Decode($this->modSettings[$optionsKey] ?? '');
+		}
 
 		if (empty($options) || !is_array($options)) {
 			$options = [];
