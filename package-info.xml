@@ -37,6 +37,7 @@
 		<!-- language files -->
 		<require-file name="language/StopForumSpam.english.php" destination="$themes_dir/default/languages" />
 		<require-file name="language/StopForumSpam.finnish.php" destination="$themes_dir/default/languages" />
+		<require-file name="language/StopForumSpam.russian.php" destination="$themes_dir/default/languages" />
 
 		<redirect url="?action=admin;area=modsettings;sa=sfs" />
 	</install>
@@ -51,6 +52,7 @@
 		<!-- language files, removed -->
 		<remove-dir name="$themes_dir/default/languages/StopForumSpam.english.php" />
 		<remove-dir name="$themes_dir/default/languages/StopForumSpam.finnish.php" />
+		<remove-dir name="$themes_dir/default/languages/StopForumSpam.russian.php" />
 
 		<!-- source files, removed -->
 		<remove-file name="$sourcedir/StopForumSpam.php" />
@@ -139,6 +141,7 @@
 		<!-- language files, removed -->
 		<remove-file name="$themes_dir/default/languages/StopForumSpam.english.php" />
 		<remove-file name="$themes_dir/default/languages/StopForumSpam.finnish.php" />
+		<remove-file name="$themes_dir/default/languages/StopForumSpam.russian.php" />
 
 		<!-- source files, removed -->
 		<remove-file name="$sourcedir/StopForumSpam.php" />
@@ -164,6 +167,7 @@
 
 		<require-file name="language/StopForumSpam.english.php" destination="$themes_dir/default/languages" />
         <require-file name="language/StopForumSpam.finnish.php" destination="$themes_dir/default/languages" />
+        <require-file name="language/StopForumSpam.russian.php" destination="$themes_dir/default/languages" />
 
 		<require-file name="StopForumSpam.php" destination="$sourcedir" />
 		<require-dir name="StopForumSpam" destination="$sourcedir" />
