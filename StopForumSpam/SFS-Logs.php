@@ -742,8 +742,13 @@ class SFSL
 			$checks = '';
 
 			foreach ($checksDecoded as $ckey => $vkey) {
-				foreach ($vkey as $key => $value) {
-					$checks .= ucfirst($key) . ':' . $value . '<br>';
+				// Some older log entries may not be nested.
+				if (!is_array($vkey)) {
+					$checks .= ucfirst($ckey) . ':' . $vkey . '<br>';
+				} else {
+					foreach ($vkey as $key => $value) {
+						$checks .= ucfirst($key) . ':' . $value . '<br>';
+					}
 				}
 			}
 		}
