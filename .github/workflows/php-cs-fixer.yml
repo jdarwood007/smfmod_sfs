@@ -1,7 +1,5 @@
 on:
   push:
-    branches:
-      - release-2.1
   pull_request:
 
 name: PHP Check
@@ -14,12 +12,17 @@ jobs:
 
       - name: Get changed files
         id: changed-files
-        uses: tj-actions/changed-files@v42
+        run: |
+          if ${{ github.event_name == 'pull_request' }}; then
+            echo "all_changed_files=$(git diff --name-only -r HEAD^1 HEAD | xargs | grep '\.php$')" >> $GITHUB_OUTPUT
+          else
+            echo "all_changed_files=$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | xargs | grep '\.php$')" >> $GITHUB_OUTPUT
+          fi
 
       - name: Get extra arguments for PHP-CS-Fixer
         id: phpcs-intersection
         run: |
-          CHANGED_FILES=$(echo "${{ steps.changed-files.outputs.all_changed_and_modified_files }}" | tr ' ' '\n')
+          CHANGED_FILES=$(echo "${{ steps.changed-files.outputs.all_changed_files }}" | tr ' ' '\n')
           if ! echo "${CHANGED_FILES}" | grep -qE "^(\\.php-cs-fixer(\\.dist)?\\.php|composer\\.lock)$"; then EXTRA_ARGS=$(printf -- '--path-mode=intersection\n--\n%s' "${CHANGED_FILES}"); else EXTRA_ARGS=''; fi
           echo "PHPCS_EXTRA_ARGS<<EOF" >> $GITHUB_ENV
           echo "$EXTRA_ARGS" >> $GITHUB_ENV
