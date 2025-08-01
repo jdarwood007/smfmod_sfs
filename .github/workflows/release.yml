@@ -1,0 +1,60 @@
+name: Generate Customization Archives
+
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  Packaging:
+    permissions: write-all
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+    - name: Build
+      run: |
+        # Get the version name.
+        NAME=$(sed -nE 's/<name>([^<]+)<\/name>/\1/p' package-info.xml | awk '{$1=$1};1')
+        NAME=`echo $NAME | sed -e "s/ /-/g"`
+        
+        # Get the version and clean it up.
+        VERSION=$(sed -nE 's/<version>([^<]+)<\/version>/\1/p' package-info.xml | awk '{$1=$1};1' | awk '{for(i=1;i<=NF;i++){ $i=toupper(substr($i,1,1)) substr($i,2) }}1')
+        VERSION=`echo $VERSION | sed -e "s/ /-/g"`
+        VERSION=`echo $VERSION | sed -e "s/Rc/RC/g"`
+        
+        if [ -z "${VERSION}" ]; then echo "Version is missing"; exit 1; fi
+        if [ -z "${NAME}" ]; then echo "Name is missing"; exit 1; fi
+        
+        BASE_FILE="${NAME}_${VERSION}"
+        
+        # Tar with gz
+        if [ "$(uname)" == "Darwin" ]; then
+            tar --no-xattrs --no-acls --no-mac-metadata --no-fflags --exclude='.git' --exclude='screenshots' --exclude='vendor' --exclude='.*' --exclude='composer.*' -czf ${{ runner.temp }}/$BASE_FILE.tgz *
+        else
+            tar --no-xattrs --no-acls --exclude='.git' --exclude='screenshots' --exclude='vendor' --exclude='.*' --exclude='composer.*' -czf ${{ runner.temp }}/$BASE_FILE.tgz *
+        fi
+        
+        # Zip
+        zip -x ".git" "screenshots/*" "vendor/*"  ".*/" "composer.*"  -1 ${{ runner.temp }}/$BASE_FILE.zip -r *
+
+        cd ${{ runner.temp }}
+        echo "TGZ_FILE=`ls *.tgz`" >> $GITHUB_ENV
+        echo "ZIP_FILE=`ls *.zip`" >> $GITHUB_ENV
+    - name: Mark Draft
+      run: |
+        gh release edit ${{github.event.release.tag_name}} --draft=true --latest
+      env:
+        GITHUB_TOKEN: ${{ github.TOKEN }}
+      shell: bash
+    - name: Upload
+      run: |
+        gh release upload ${{github.event.release.tag_name}} ${{ runner.temp }}/${{ env.TGZ_FILE }} ${{ runner.temp }}/${{ env.ZIP_FILE }}
+      env:
+        GITHUB_TOKEN: ${{ github.TOKEN }}
+      shell: bash
+    - name: Mark Published
+      run: |
+        gh release edit ${{github.event.release.tag_name}} --draft=false --prerelease=false --latest
+      env:
+        GITHUB_TOKEN: ${{ github.TOKEN }}
+      shell: bash
